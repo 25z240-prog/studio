@@ -3,16 +3,18 @@
 import { useState, Suspense } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
-import { Plus, UtensilsCrossed } from "lucide-react";
+import { Plus, UtensilsCrossed, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
 import { initialMenuItems } from "@/lib/data";
 import { type MenuItem } from "@/lib/types";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 function VotePageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const role = searchParams.get('role');
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>(initialMenuItems);
@@ -43,6 +45,10 @@ function VotePageContent() {
 
   const showProposeButton = role === 'management';
 
+  const handleLogout = () => {
+    router.push('/login');
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -53,18 +59,24 @@ function VotePageContent() {
               Hostel Chow Vote
             </h1>
           </Link>
-          {showProposeButton && (
-            <AddMenuItemDialog
-              onAddItem={handleAddItem}
-              open={isDialogOpen}
-              onOpenChange={setIsDialogOpen}
-            >
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Propose an Item
-              </Button>
-            </AddMenuItemDialog>
-          )}
+          <div className="flex items-center gap-4">
+            {showProposeButton && (
+              <AddMenuItemDialog
+                onAddItem={handleAddItem}
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+              >
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Propose an Item
+                </Button>
+              </AddMenuItemDialog>
+            )}
+             <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+            </Button>
+          </div>
         </div>
       </header>
       <main className="flex-1">
