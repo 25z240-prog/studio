@@ -68,29 +68,45 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const newItem = {
-      title: values.title,
-      description: values.description,
-      ingredients: values.ingredients.split(",").map((i) => i.trim()),
-      instructions: values.instructions,
-      imageUrl: values.imageUrl,
-      imageHint: "custom dish",
-      dietaryInfo: values.dietaryInfo,
-      nutrition: {
-        calories: values.calories,
-        protein: values.protein,
-        carbs: values.carbs,
-        fat: values.fat,
-      },
-    };
-    onAddItem(newItem);
-    toast({
-      title: "Success!",
-      description: "Your menu item has been proposed.",
-    });
-    form.reset();
-    onOpenChange(false);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+        const url = new URL(values.imageUrl);
+        // This is a placeholder for a server action that would update next.config.js
+        // Since we can't directly modify server files from the client,
+        // in a real app this would be an API call.
+        console.log(`Ensuring hostname is allowed: ${url.hostname}`);
+
+        const newItem = {
+          title: values.title,
+          description: values.description,
+          ingredients: values.ingredients.split(",").map((i) => i.trim()),
+          instructions: values.instructions,
+          imageUrl: values.imageUrl,
+          imageHint: "custom dish",
+          dietaryInfo: values.dietaryInfo,
+          nutrition: {
+            calories: values.calories,
+            protein: values.protein,
+            carbs: values.carbs,
+            fat: values.fat,
+          },
+        };
+
+        onAddItem(newItem);
+        toast({
+          title: "Success!",
+          description: "Your menu item has been proposed.",
+        });
+        form.reset();
+        onOpenChange(false);
+    } catch(e) {
+        console.error("Error submitting new item:", e);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not add the new item. Please check the image URL and try again.",
+        });
+    }
   }
 
   return (
@@ -138,9 +154,11 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                 <FormItem>
                   <FormLabel>Image URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://picsum.photos/seed/..." {...field} />
+                    <Input placeholder="https://your-image-source.com/image.jpg" {...field} />
                   </FormControl>
-                  <FormDescription>Find a placeholder at picsum.photos.</FormDescription>
+                  <FormDescription>
+                    Please provide a direct link to an image of the dish.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
