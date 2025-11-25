@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Image from "next/image";
+import { useSearchParams } from 'next/navigation';
 import { Plus, UtensilsCrossed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
@@ -10,7 +11,10 @@ import { initialMenuItems } from "@/lib/data";
 import { type MenuItem } from "@/lib/types";
 import Link from "next/link";
 
-export default function VotePage() {
+function VotePageContent() {
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role');
+
   const [menuItems, setMenuItems] = useState<MenuItem[]>(initialMenuItems);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [votedItems, setVotedItems] = useState<Set<string>>(new Set());
@@ -37,6 +41,8 @@ export default function VotePage() {
   
   const sortedMenuItems = [...menuItems].sort((a, b) => b.votes - a.votes);
 
+  const showProposeButton = role === 'management';
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -47,16 +53,18 @@ export default function VotePage() {
               Hostel Chow Vote
             </h1>
           </Link>
-          <AddMenuItemDialog
-            onAddItem={handleAddItem}
-            open={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
-          >
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Propose an Item
-            </Button>
-          </AddMenuItemDialog>
+          {showProposeButton && (
+            <AddMenuItemDialog
+              onAddItem={handleAddItem}
+              open={isDialogOpen}
+              onOpenChange={setIsDialogOpen}
+            >
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Propose an Item
+              </Button>
+            </AddMenuItemDialog>
+          )}
         </div>
       </header>
       <main className="flex-1">
@@ -91,18 +99,20 @@ export default function VotePage() {
                     No menu items proposed yet.
                 </h3>
                 <p className="text-muted-foreground mt-2">
-                    Be the first to propose a delicious new dish for the menu!
+                    {showProposeButton ? "Be the first to propose a delicious new dish for the menu!" : "No items have been proposed for voting yet."}
                 </p>
-                <AddMenuItemDialog
-                  onAddItem={handleAddItem}
-                  open={isDialogOpen}
-                  onOpenChange={setIsDialogOpen}
-                >
-                  <Button className="mt-6">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Propose an Item
-                  </Button>
-                </AddMenuItemDialog>
+                {showProposeButton && (
+                    <AddMenuItemDialog
+                    onAddItem={handleAddItem}
+                    open={isDialogOpen}
+                    onOpenChange={setIsDialogOpen}
+                    >
+                    <Button className="mt-6">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Propose an Item
+                    </Button>
+                    </AddMenuItemDialog>
+                )}
             </div>
           )}
         </section>
@@ -115,5 +125,13 @@ export default function VotePage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function VotePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VotePageContent />
+    </Suspense>
   );
 }

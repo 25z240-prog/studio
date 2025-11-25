@@ -13,7 +13,7 @@ export default function ManagementLoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/vote');
+    router.push('/vote?role=management');
   };
 
   return (
