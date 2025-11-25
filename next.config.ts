@@ -57,6 +57,12 @@ const nextConfig: NextConfig = {
         hostname: "www.flavourstreat.com",
         port: "",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "shop.sresthproducts.com",
+        port: "",
+        pathname: "/**",
       }
     ],
   },
