@@ -1,34 +1,34 @@
 {
   "placeholderImages": [
     {
-      "id": "pasta-aglio-e-olio",
-      "description": "A classic Italian pasta dish, Aglio e Olio, in a white bowl.",
-      "imageUrl": "https://images.unsplash.com/photo-1589227365533-5f62a42a53a8?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "imageHint": "pasta bowl"
+      "id": "masala-dosa",
+      "description": "A golden-brown, crispy Masala Dosa folded over a spiced potato filling, served on a banana leaf.",
+      "imageUrl": "https://images.unsplash.com/photo-1626500237926-389710899b82?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "masala dosa"
     },
     {
-      "id": "quinoa-salad",
-      "description": "A healthy and vibrant quinoa salad with mixed vegetables.",
-      "imageUrl": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "imageHint": "salad bowl"
+      "id": "idli-sambar",
+      "description": "A serving of soft, white Idlis in a bowl of hot Sambar, garnished with fresh coriander.",
+      "imageUrl": "https://images.unsplash.com/photo-1615870216519-2f47413689b9?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "idli sambar"
     },
     {
-      "id": "margherita-pizza",
-      "description": "A slice of classic Margherita pizza with fresh basil.",
-      "imageUrl": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1981&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "imageHint": "pizza slice"
+      "id": "ven-pongal",
+      "description": "A bowl of savory Ven Pongal topped with cashews, black pepper, and a drizzle of ghee.",
+      "imageUrl": "https://m.media-amazon.com/images/I/71SiLxdQ0jL._AC_UF1000,1000_QL80_.jpg",
+      "imageHint": "pongal dish"
     },
     {
-      "id": "classic-burger",
-      "description": "A juicy beef burger with a side of crispy french fries.",
-      "imageUrl": "https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "imageHint": "burger fries"
+      "id": "bisi-bele-bath",
+      "description": "A rich and flavorful bowl of Bisi Bele Bath, a complete meal with rice, lentils, and vegetables.",
+      "imageUrl": "https://images.unsplash.com/photo-1606491047451-5712c40ce33e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "rice dish"
     },
     {
-      "id": "veggie-stir-fry",
-      "description": "A colorful vegetable stir-fry with tofu.",
-      "imageUrl": "https://images.unsplash.com/photo-1543339308-43e59d6b70a6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "imageHint": "stir-fry"
+      "id": "lemon-rice",
+      "description": "A bright yellow bowl of tangy Lemon Rice, garnished with peanuts and fresh curry leaves.",
+      "imageUrl": "https://images.unsplash.com/photo-1601205741225-7ac788719c17?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "lemon rice"
     }
   ]
 }
