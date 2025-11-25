@@ -54,7 +54,7 @@ function VotePageContent() {
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/login" className="flex items-center gap-3">
-             <Image src="https://firebasestorage.googleapis.com/v0/b/app-pro-hot-storage.appspot.com/o/images%2F1723555237258-psg-itech-logo.png?alt=media" width={32} height={32} alt="PSG iTech Logo" />
+             <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={32} height={32} alt="PSG iTech Logo" />
             <h1 className="text-2xl font-bold font-headline text-primary">
               PSG iTech Hostel Mess
             </h1>
@@ -105,7 +105,7 @@ function VotePageContent() {
           ) : (
              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-12 text-center">
                 <div className="mb-4 rounded-full bg-muted p-4">
-                    <Image src="https://firebasestorage.googleapis.com/v0/b/app-pro-hot-storage.appspot.com/o/images%2F1723555237258-psg-itech-logo.png?alt=media" width={48} height={48} alt="PSG iTech Logo" />
+                    <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={48} height={48} alt="PSG iTech Logo" />
                 </div>
                 <h3 className="text-2xl font-bold tracking-tight font-headline">
                     No menu items proposed yet.

@@ -10,7 +10,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
        <div className="flex items-center gap-3 mb-8">
-            <Image src="https://firebasestorage.googleapis.com/v0/b/app-pro-hot-storage.appspot.com/o/images%2F1723555237258-psg-itech-logo.png?alt=media" width={40} height={40} alt="PSG iTech Logo" />
+            <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={40} height={40} alt="PSG iTech Logo" />
             <h1 className="text-3xl font-bold font-headline text-primary">
               PSG iTech Hostel Mess
             </h1>
