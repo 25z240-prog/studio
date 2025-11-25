@@ -3,19 +3,19 @@
     {
       "id": "masala-dosa",
       "description": "A golden-brown, crispy Masala Dosa folded over a spiced potato filling, served on a banana leaf.",
-      "imageUrl": "https://images.unsplash.com/photo-1626500237926-389710899b82?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageUrl": "https://images.unsplash.com/photo-1668665782397-3660d370b3d6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "imageHint": "masala dosa"
     },
     {
       "id": "idli-sambar",
       "description": "A serving of soft, white Idlis in a bowl of hot Sambar, garnished with fresh coriander.",
-      "imageUrl": "https://images.unsplash.com/photo-1615870216519-2f47413689b9?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageUrl": "https://images.unsplash.com/photo-1609359325996-37a2b25126d4?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "imageHint": "idli sambar"
     },
     {
       "id": "ven-pongal",
       "description": "A bowl of savory Ven Pongal topped with cashews, black pepper, and a drizzle of ghee.",
-      "imageUrl": "https://m.media-amazon.com/images/I/71SiLxdQ0jL._AC_UF1000,1000_QL80_.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1695422899476-20098a5814e8?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "imageHint": "pongal dish"
     },
     {
