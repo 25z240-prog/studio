@@ -75,6 +75,12 @@ const nextConfig: NextConfig = {
         hostname: "www.subbuskitchen.com",
         port: "",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.vegrecipesofindia.com",
+        port: "",
+        pathname: "/**",
       }
     ],
   },
