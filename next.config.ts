@@ -63,6 +63,12 @@ const nextConfig: NextConfig = {
         hostname: "shop.sresthproducts.com",
         port: "",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "i0.wp.com",
+        port: "",
+        pathname: "/**",
       }
     ],
   },
