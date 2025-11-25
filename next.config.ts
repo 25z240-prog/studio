@@ -51,6 +51,12 @@ const nextConfig: NextConfig = {
         hostname: "chakriskitchen.com",
         port: "",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.flavourstreat.com",
+        port: "",
+        pathname: "/**",
       }
     ],
   },
