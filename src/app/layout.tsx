@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Hostel Chow Vote',
+  title: 'PSG iTech Hostel Mess',
   description: 'Vote for your favorite hostel menu items!',
 };
 

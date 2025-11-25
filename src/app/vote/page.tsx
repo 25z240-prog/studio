@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
-import { Plus, UtensilsCrossed, LogOut } from "lucide-react";
+import { Plus, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
@@ -54,9 +54,9 @@ function VotePageContent() {
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/login" className="flex items-center gap-3">
-            <UtensilsCrossed className="h-7 w-7 text-primary" />
+             <Image src="https://firebasestorage.googleapis.com/v0/b/app-pro-hot-storage.appspot.com/o/images%2F1723555237258-psg-itech-logo.png?alt=media" width={32} height={32} alt="PSG iTech Logo" />
             <h1 className="text-2xl font-bold font-headline text-primary">
-              Hostel Chow Vote
+              PSG iTech Hostel Mess
             </h1>
           </Link>
           <div className="flex items-center gap-4">
@@ -105,7 +105,7 @@ function VotePageContent() {
           ) : (
              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-12 text-center">
                 <div className="mb-4 rounded-full bg-muted p-4">
-                    <UtensilsCrossed className="h-12 w-12 text-muted-foreground" />
+                    <Image src="https://firebasestorage.googleapis.com/v0/b/app-pro-hot-storage.appspot.com/o/images%2F1723555237258-psg-itech-logo.png?alt=media" width={48} height={48} alt="PSG iTech Logo" />
                 </div>
                 <h3 className="text-2xl font-bold tracking-tight font-headline">
                     No menu items proposed yet.
@@ -132,7 +132,7 @@ function VotePageContent() {
       <footer className="py-6 md:px-8 md:py-0 border-t">
         <div className="container flex flex-col items-center justify-center gap-4 md:h-24 md:flex-row">
           <p className="text-center text-sm leading-loose text-muted-foreground">
-            Built for the hostel community. All rights reserved.
+            Built for the PSG iTech hostel community. All rights reserved.
           </p>
         </div>
       </footer>

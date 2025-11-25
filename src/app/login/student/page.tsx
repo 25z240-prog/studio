@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
 
 export default function StudentLoginPage() {
@@ -19,9 +19,9 @@ export default function StudentLoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="flex items-center gap-3 mb-8">
-          <UtensilsCrossed className="h-8 w-8 text-primary" />
+          <Image src="https://firebasestorage.googleapis.com/v0/b/app-pro-hot-storage.appspot.com/o/images%2F1723555237258-psg-itech-logo.png?alt=media" width={40} height={40} alt="PSG iTech Logo" />
           <h1 className="text-3xl font-bold font-headline text-primary">
-            Hostel Chow Vote
+            PSG iTech Hostel Mess
           </h1>
       </div>
       <Card className="w-full max-w-sm shadow-2xl">
