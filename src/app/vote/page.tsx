@@ -157,7 +157,7 @@ function VotePageContent() {
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-headline text-foreground">
               Weekly Menu Proposals
             </h2>
-            <p className="mx-auto max-w-[700px] text-foreground/80 md:text-xl mt-4">
+            <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
               Vote for your favorite dishes to see them on next week&apos;s menu! The most popular items win.
             </p>
           </div>
