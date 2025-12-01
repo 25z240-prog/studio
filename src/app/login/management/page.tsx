@@ -10,42 +10,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blocking-login";
-import { useAuth, useFirestore } from "@/firebase/provider";
-import { doc } from "firebase/firestore";
-import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
+import { useAuth } from "@/firebase/provider";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function ManagementLoginPage() {
   const router = useRouter();
   const auth = useAuth();
-  const firestore = useFirestore();
   const { toast } = useToast();
   const [email, setEmail] = useState("management@psgitech.ac.in");
   const [password, setPassword] = useState("psg@123@Management");
   const [showPassword, setShowPassword] = useState(false);
-
-  // This effect will attempt to create the management user once.
-  // It will silently fail if the user already exists, which is fine.
-  useEffect(() => {
-    if (auth && firestore) {
-      initiateEmailSignUp(auth, "management@psgitech.ac.in", "psg@123@Management", "Management")
-        .then(userCredential => {
-            if (userCredential?.user) {
-                 const userDocRef = doc(firestore, "users", userCredential.user.uid);
-                 setDocumentNonBlocking(userDocRef, { 
-                    id: userCredential.user.uid,
-                    name: "Management",
-                    email: "management@psgitech.ac.in"
-                 }, { merge: true });
-            }
-        })
-        .catch(() => {
-          // Ignore errors (e.g., user already exists)
-        });
-    }
-  }, [auth, firestore]);
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,11 +34,15 @@ export default function ManagementLoginPage() {
         });
         router.push('/vote?role=management');
       })
-      .catch(() => {
+      .catch((error) => {
+        let description = "An unexpected error occurred.";
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+          description = "Incorrect email or password. Please try again.";
+        }
         toast({
             variant: "destructive",
             title: "Login Failed",
-            description: "Incorrect email or password. Please try again.",
+            description: description,
         });
       });
   };
