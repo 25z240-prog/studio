@@ -10,18 +10,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { useAuth } from "@/firebase/provider";
+import { signInWithEmailAndPassword, UserCredential } from "firebase/auth";
+import { useAuth, useFirestore } from "@/firebase/provider";
 import { Eye, EyeOff } from "lucide-react";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function ManagementLoginPage() {
   const router = useRouter();
   const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const [email, setEmail] = useState("management@psgitech.ac.in");
   const [password, setPassword] = useState("psg@123@Management");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleLoginSuccess = async (userCredential: UserCredential) => {
+    if (!firestore) return;
+    const user = userCredential.user;
+
+    // Ensure a user document exists for management
+    const userDocRef = doc(firestore, "users", user.uid);
+    await setDoc(userDocRef, {
+        id: user.uid,
+        name: "Management",
+        email: user.email
+    }, { merge: true });
+
+    toast({
+        title: "Login Successful",
+        description: "Redirecting to the dashboard.",
+    });
+    router.push('/vote?role=management');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,12 +51,8 @@ export default function ManagementLoginPage() {
     setIsSubmitting(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({
-          title: "Login Successful",
-          description: "Redirecting to the dashboard.",
-      });
-      router.push('/vote?role=management');
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await handleLoginSuccess(userCredential);
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
