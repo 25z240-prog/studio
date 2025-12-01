@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -15,14 +15,14 @@ import { useAuth, useFirestore } from "@/firebase/provider";
 import { doc } from "firebase/firestore";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { Eye, EyeOff } from "lucide-react";
+import { AuthErrorCodes } from "firebase/auth";
 
 export default function StudentLoginPage() {
   const router = useRouter();
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [name, setName] = useState("Test Student");
+  
   const [email, setEmail] = useState("student@psgitech.ac.in");
   const [password, setPassword] = useState("password");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,48 +31,68 @@ export default function StudentLoginPage() {
     e.preventDefault();
     if (!auth || !firestore) return;
 
-    if (isSignUp) {
-      initiateEmailSignUp(auth, email, password, name)
-        .then(userCredential => {
-          if (userCredential?.user) {
-              const userDocRef = doc(firestore, "users", userCredential.user.uid);
-              setDocumentNonBlocking(userDocRef, { 
-                id: userCredential.user.uid,
-                name: name,
-                email: email 
-              }, {});
-              toast({
-                  title: "Account Created!",
-                  description: "You've been successfully signed up.",
-              });
-              router.push('/vote?role=student');
-          }
-        })
-        .catch(error => {
-           toast({
-              variant: "destructive",
-              title: "Sign Up Failed",
-              description: error.message || "An unexpected error occurred.",
-          });
+    if (!email.endsWith('@psgitech.ac.in')) {
+        toast({
+            variant: "destructive",
+            title: "Invalid Email",
+            description: "Only emails from @psgitech.ac.in are allowed.",
         });
-      
-    } else {
-      initiateEmailSignIn(auth, email, password)
-       .then(() => {
-          toast({
-              title: "Logging in...",
-              description: "Please wait while we log you in.",
-          });
-          router.push('/vote?role=student');
-       })
-       .catch(() => {
-           toast({
-              variant: "destructive",
-              title: "Login Failed",
-              description: "User does not exist or incorrect password.",
-          });
-       });
+        return;
     }
+
+    if (password !== 'password') {
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "Please use the default password 'password' to log in for the first time. You can change it later.",
+        });
+        return;
+    }
+
+    initiateEmailSignIn(auth, email, password)
+      .then(userCredential => {
+        toast({
+          title: "Logged In!",
+          description: "Welcome back!",
+        });
+        router.push('/vote?role=student');
+      })
+      .catch(error => {
+        if (error.code === AuthErrorCodes.USER_NOT_FOUND) {
+          // User doesn't exist, so create a new account
+          const studentName = email.split('@')[0]; // Simple name generation
+          initiateEmailSignUp(auth, email, password, studentName)
+            .then(userCredential => {
+              if (userCredential?.user) {
+                const userDocRef = doc(firestore, "users", userCredential.user.uid);
+                setDocumentNonBlocking(userDocRef, {
+                  id: userCredential.user.uid,
+                  name: studentName,
+                  email: email
+                }, {});
+                toast({
+                  title: "Account Created!",
+                  description: "Welcome! Your account has been created.",
+                });
+                router.push('/vote?role=student');
+              }
+            })
+            .catch(signUpError => {
+              toast({
+                variant: "destructive",
+                title: "Sign Up Failed",
+                description: signUpError.message || "Could not create your account.",
+              });
+            });
+        } else {
+          // Handle other sign-in errors
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "An unexpected error occurred. Please try again.",
+          });
+        }
+      });
   };
 
   return (
@@ -85,17 +105,11 @@ export default function StudentLoginPage() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">{isSignUp ? 'Create Student Account' : 'Student Login'}</CardTitle>
-          <CardDescription>{isSignUp ? 'Enter your details to create an account.' : 'Enter your credentials to vote.'}</CardDescription>
+          <CardTitle className="text-2xl font-headline">Student Login</CardTitle>
+          <CardDescription>Enter your PSG iTech email to continue. Use 'password' for your first login.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-4">
-            {isSignUp && (
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} required />
-              </div>
-            )}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
                <Input id="email" type="email" placeholder="student@psgitech.ac.in" value={email} onChange={(e) => setEmail(e.target.value)} required />
@@ -116,10 +130,7 @@ export default function StudentLoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button className="w-full" type="submit">{isSignUp ? 'Sign Up' : 'Login'}</Button>
-             <Button variant="link" size="sm" type="button" onClick={() => setIsSignUp(!isSignUp)}>
-                {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
-            </Button>
+            <Button className="w-full" type="submit">Login</Button>
             <Button variant="link" size="sm" asChild>
                 <Link href="/login">Back to role selection</Link>
             </Button>

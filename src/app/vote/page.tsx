@@ -4,7 +4,7 @@
 import { useState, useEffect, Suspense, useMemo } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
-import { Plus, LogOut, UserCircle } from "lucide-react";
+import { Plus, LogOut, UserCircle, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
@@ -17,6 +17,7 @@ import { useAuth, useFirebase, useCollection, useMemoFirebase } from "@/firebase
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { collection, doc, increment } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 
 const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -97,6 +98,31 @@ function VotePageContent() {
     auth?.signOut();
     router.push('/login');
   };
+
+  const handleChangePassword = () => {
+    if (!auth || !user?.email) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not send password reset email. User not found.",
+      });
+      return;
+    }
+    sendPasswordResetEmail(auth, user.email)
+      .then(() => {
+        toast({
+          title: "Password Reset Email Sent",
+          description: `An email has been sent to ${user.email} with instructions to reset your password.`,
+        });
+      })
+      .catch((error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to send password reset email.",
+        });
+      });
+  };
   
   const renderCategory = (day: DayOfWeek, category: MenuCategory) => {
     const categoryItems = sortedMenuItems.filter(item => item.day === day && item.category === category);
@@ -175,6 +201,12 @@ function VotePageContent() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                 {role === 'student' && (
+                  <DropdownMenuItem onClick={handleChangePassword}>
+                    <KeyRound className="mr-2 h-4 w-4" />
+                    <span>Change Password</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
