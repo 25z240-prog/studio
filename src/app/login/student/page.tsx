@@ -31,11 +31,25 @@ export default function StudentLoginPage() {
     e.preventDefault();
     if (!auth || !firestore) return;
 
-    if (!email.endsWith('@psgitech.ac.in')) {
+    // Regex to validate the student email format
+    const emailRegex = /^(2[0-5])[a-z]+([0-9]{1,3})@psgitech\.ac\.in$/i;
+    const match = email.match(emailRegex);
+
+    if (!match) {
         toast({
             variant: "destructive",
-            title: "Invalid Email",
-            description: "Only emails from @psgitech.ac.in are allowed.",
+            title: "Invalid Email Format",
+            description: "Please use your official student email, e.g., '23cs001@psgitech.ac.in'.",
+        });
+        return;
+    }
+
+    const rollNumber = parseInt(match[2], 10);
+    if (rollNumber < 0 || rollNumber > 500) {
+        toast({
+            variant: "destructive",
+            title: "Invalid Roll Number",
+            description: "The roll number in your email must be between 0 and 500.",
         });
         return;
     }
