@@ -33,7 +33,7 @@ export default function ManagementLoginPage() {
         });
         router.push('/vote?role=management');
       })
-      .catch(error => {
+      .catch(() => {
         toast({
             variant: "destructive",
             title: "Login Failed",

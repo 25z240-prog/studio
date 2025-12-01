@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -25,61 +25,72 @@ export default function StudentLoginPage() {
   const [email, setEmail] = useState("student@psgitech.ac.in");
   const [password, setPassword] = useState("password");
 
+  // This effect will attempt to create the management user once.
+  // It will silently fail if the user already exists, which is fine.
+  useEffect(() => {
+    if (auth) {
+      initiateEmailSignUp(auth, "management@psgitech.ac.in", "psg@123@Management", "Management")
+        .then(userCredential => {
+            if (userCredential?.user && firestore) {
+                 const userDocRef = doc(firestore, "users", userCredential.user.uid);
+                 setDocumentNonBlocking(userDocRef, { 
+                    id: userCredential.user.uid,
+                    name: "Management",
+                    email: "management@psgitech.ac.in"
+                 }, {});
+            }
+        })
+        .catch(() => {
+          // Ignore errors (e.g., user already exists)
+        });
+    }
+  }, [auth, firestore]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth || !firestore) return;
 
-    try {
-      if (isSignUp) {
-        // We need to get the user back from this to create the user doc
-        initiateEmailSignUp(auth, email, password, name)
-          .then(userCredential => {
-            if (userCredential?.user) {
-                const userDocRef = doc(firestore, "users", userCredential.user.uid);
-                setDocumentNonBlocking(userDocRef, { 
-                  id: userCredential.user.uid,
-                  name: name,
-                  email: email 
-                }, {});
-                toast({
-                    title: "Account Created!",
-                    description: "You've been successfully signed up.",
-                });
-                router.push('/vote?role=student');
-            }
-          })
-          .catch(error => {
-             toast({
-                variant: "destructive",
-                title: "Sign Up Failed",
-                description: error.message || "An unexpected error occurred.",
-            });
+    if (isSignUp) {
+      initiateEmailSignUp(auth, email, password, name)
+        .then(userCredential => {
+          if (userCredential?.user) {
+              const userDocRef = doc(firestore, "users", userCredential.user.uid);
+              setDocumentNonBlocking(userDocRef, { 
+                id: userCredential.user.uid,
+                name: name,
+                email: email 
+              }, {});
+              toast({
+                  title: "Account Created!",
+                  description: "You've been successfully signed up.",
+              });
+              router.push('/vote?role=student');
+          }
+        })
+        .catch(error => {
+           toast({
+              variant: "destructive",
+              title: "Sign Up Failed",
+              description: error.message || "An unexpected error occurred.",
           });
-        
-      } else {
-        initiateEmailSignIn(auth, email, password)
-         .then(() => {
-            toast({
-                title: "Logging in...",
-                description: "Please wait while we log you in.",
-            });
-            router.push('/vote?role=student');
-         })
-         .catch(error => {
-             toast({
-                variant: "destructive",
-                title: "Login Failed",
-                description: "User does not exist or incorrect password.",
-            });
-         })
-      }
-    } catch (error: any) {
-        toast({
-            variant: "destructive",
-            title: isSignUp ? "Sign Up Failed" : "Login Failed",
-            description: error.message || "An unexpected error occurred.",
         });
+      
+    } else {
+      initiateEmailSignIn(auth, email, password)
+       .then(() => {
+          toast({
+              title: "Logging in...",
+              description: "Please wait while we log you in.",
+          });
+          router.push('/vote?role=student');
+       })
+       .catch(() => {
+           toast({
+              variant: "destructive",
+              title: "Login Failed",
+              description: "User does not exist or incorrect password.",
+          });
+       });
     }
   };
 

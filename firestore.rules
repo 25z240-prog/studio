@@ -16,18 +16,19 @@ service cloud.firestore {
       allow create: if request.resource.data.id == userId;
       allow write: if isOwner(userId);
     }
-    match /users/{userId}/votes/{voteId} {
-      allow read, write: if isOwner(userId);
-    }
+    
     match /menuItems/{menuItemId} {
-      allow get, list: if isSignedIn();
-      allow create: if isManagement() && request.resource.data.submitterId == request.auth.uid;
-      allow update: if isManagement() && resource.data.submitterId == request.auth.uid;
-      allow delete: if isManagement() && resource.data.submitterId == request.auth.uid;
+      allow list, get: if isSignedIn();
+      allow create, update, delete: if isManagement() && request.resource.data.submitterId == request.auth.uid;
       
       match /votes/{voteId} {
-        allow read, write: if isSignedIn() && request.resource.data.voterId == request.auth.uid;
+         allow create, update, delete: if isSignedIn() && request.resource.data.voterId == request.auth.uid;
+         allow read: if isSignedIn() && isOwner(request.resource.data.voterId);
       }
+    }
+    
+     match /users/{userId}/votes/{voteId} {
+      allow read, write: if isOwner(userId);
     }
   }
 }
