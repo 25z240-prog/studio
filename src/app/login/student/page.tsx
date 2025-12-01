@@ -27,27 +27,6 @@ export default function StudentLoginPage() {
   const [password, setPassword] = useState("password");
   const [showPassword, setShowPassword] = useState(false);
 
-  // This effect will attempt to create the management user once.
-  // It will silently fail if the user already exists, which is fine.
-  useEffect(() => {
-    if (auth) {
-      initiateEmailSignUp(auth, "management@psgitech.ac.in", "psg@123@Management", "Management")
-        .then(userCredential => {
-            if (userCredential?.user && firestore) {
-                 const userDocRef = doc(firestore, "users", userCredential.user.uid);
-                 setDocumentNonBlocking(userDocRef, { 
-                    id: userCredential.user.uid,
-                    name: "Management",
-                    email: "management@psgitech.ac.in"
-                 }, {});
-            }
-        })
-        .catch(() => {
-          // Ignore errors (e.g., user already exists)
-        });
-    }
-  }, [auth, firestore]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth || !firestore) return;
