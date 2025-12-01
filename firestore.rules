@@ -30,8 +30,13 @@ service cloud.firestore {
       allow update: if (isManagement() && request.resource.data.submitterId == request.auth.uid) ||
                       (isStudent() && 
                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']) &&
-                       // Ensure the vote count is a natural number
-                       (request.resource.data.votes >= 0 || request.resource.data.votes > resource.data.votes));
+                       (
+                         // Allow incrementing votes
+                         request.resource.data.votes == resource.data.votes + 1 ||
+                         // Allow decrementing votes only if current votes > 0
+                         (request.resource.data.votes == resource.data.votes - 1 && resource.data.votes > 0)
+                       )
+                      );
 
       match /votes/{voteId} {
          allow create, update, delete: if isStudent() && request.resource.data.voterId == request.auth.uid;
