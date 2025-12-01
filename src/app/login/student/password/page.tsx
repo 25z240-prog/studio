@@ -70,7 +70,6 @@ function PasswordPageContent() {
 
         } catch (error) {
             console.error("Error during profile update or firestore write:", error);
-            // This toast is for a failure after a successful login
             toast({
                 variant: "destructive",
                 title: "Setup Failed",
@@ -83,44 +82,59 @@ function PasswordPageContent() {
         e.preventDefault();
         if (!auth || !email) return;
 
-        if (isNewUser && password !== confirmPassword) {
-            toast({
-                variant: "destructive",
-                title: "Passwords do not match",
-                description: "Please re-enter your password and confirm it.",
-            });
-            return;
-        }
-
         setIsSubmitting(true);
 
-        try {
-            let userCredential;
-            if (isNewUser) {
-                userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            } else {
-                userCredential = await signInWithEmailAndPassword(auth, email, password);
+        if (isNewUser) {
+            // --- NEW USER LOGIC ---
+            if (password !== confirmPassword) {
+                toast({
+                    variant: "destructive",
+                    title: "Passwords do not match",
+                    description: "Please re-enter your password and confirm it.",
+                });
+                setIsSubmitting(false);
+                return;
             }
-            await handleLoginSuccess(userCredential);
-        } catch (error: any) {
-            let description = "An unexpected error occurred. Please try again.";
-            if (error.code === AuthErrorCodes.INVALID_PASSWORD || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                description = "The password you entered is incorrect. Please try again.";
-            } else if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
-                description = "Your password is too weak. Please choose a stronger one with at least 6 characters.";
-            } else if (error.code === 'auth/too-many-requests') {
-                description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
-            } else if (error.code === 'auth/email-already-in-use') {
-                description = "This email is already registered. Please login with your password.";
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await handleLoginSuccess(userCredential);
+            } catch (error: any) {
+                let description = "An unexpected error occurred. Please try again.";
+                if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
+                    description = "Your password is too weak. Please choose a stronger one with at least 6 characters.";
+                } else if (error.code === 'auth/email-already-in-use') {
+                    description = "This email is already registered. Please go back and log in.";
+                }
+                toast({
+                    variant: "destructive",
+                    title: "Registration Failed",
+                    description: description,
+                });
+            } finally {
+                setIsSubmitting(false);
             }
-            
-            toast({
-                variant: "destructive",
-                title: isNewUser ? "Registration Failed" : "Login Failed",
-                description: error.message || description,
-            });
-        } finally {
-            setIsSubmitting(false);
+
+        } else {
+            // --- EXISTING USER LOGIC ---
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                await handleLoginSuccess(userCredential);
+            } catch (error: any) {
+                let description = "An unexpected error occurred. Please try again.";
+                if (error.code === AuthErrorCodes.INVALID_PASSWORD || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    description = "The password you entered is incorrect. Please try again.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
+                }
+                toast({
+                    variant: "destructive",
+                    title: "Login Failed",
+                    description: description,
+                });
+            } finally {
+                setIsSubmitting(false);
+            }
         }
     };
 
