@@ -23,7 +23,7 @@ export default function StudentLoginPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  const [email, setEmail] = useState("student@psgitech.ac.in");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("password");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -60,7 +60,7 @@ export default function StudentLoginPage() {
       .catch(error => {
         if (error.code === AuthErrorCodes.USER_NOT_FOUND) {
           // User doesn't exist, so create a new account
-          const studentName = email.split('@')[0]; // Simple name generation
+          const studentName = email.split('@')[0].replace('.', ' ').replace('_', ' '); // Simple name generation
           initiateEmailSignUp(auth, email, password, studentName)
             .then(userCredential => {
               if (userCredential?.user) {
@@ -84,12 +84,19 @@ export default function StudentLoginPage() {
                 description: signUpError.message || "Could not create your account.",
               });
             });
-        } else {
+        } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+            toast({
+                variant: "destructive",
+                title: "Login Failed",
+                description: "Incorrect password. If you have changed your password, please use the new one. Otherwise, use the default 'password'.",
+            });
+        }
+        else {
           // Handle other sign-in errors
           toast({
             variant: "destructive",
             title: "Login Failed",
-            description: "An unexpected error occurred. Please try again.",
+            description: error.message || "An unexpected error occurred. Please try again.",
           });
         }
       });
@@ -112,7 +119,7 @@ export default function StudentLoginPage() {
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-               <Input id="email" type="email" placeholder="student@psgitech.ac.in" value={email} onChange={(e) => setEmail(e.target.value)} required />
+               <Input id="email" type="email" placeholder="yourname@psgitech.ac.in" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="grid gap-2 relative">
               <Label htmlFor="password">Password</Label>
@@ -130,7 +137,7 @@ export default function StudentLoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button className="w-full" type="submit">Login</Button>
+            <Button className="w-full" type="submit">Login / Register</Button>
             <Button variant="link" size="sm" asChild>
                 <Link href="/login">Back to role selection</Link>
             </Button>
