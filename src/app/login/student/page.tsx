@@ -25,15 +25,15 @@ export default function StudentLoginPage() {
 
   // This function is called ONLY after a successful sign-in or sign-up
   const handleLoginSuccess = async (userCredential: UserCredential) => {
-    if (!firestore) return;
+    if (!firestore || !auth) return;
     
     const user = userCredential.user;
     
-    // Sanitize email to create a display name, e.g., '23cs001' -> '23cs 001'
-    const studentName = user.email!.split('@')[0].replace(/[\._]/g, ' ');
+    // Sanitize email to create a display name, e.g., '23cs001' -> '23cs001'
+    const studentName = user.email!.split('@')[0];
     
     try {
-      // If the user's profile name is not set, update it.
+      // Ensure profile name is set
       if (!user.displayName) {
         await updateProfile(user, { displayName: studentName });
       }
@@ -61,7 +61,7 @@ export default function StudentLoginPage() {
           description: "Your account was created, but we couldn't save your profile. Please try logging in again.",
       });
       // Log the user out to avoid being in a broken state
-      auth?.signOut();
+      auth.signOut();
     }
   }
 
@@ -73,30 +73,30 @@ export default function StudentLoginPage() {
 
     const password = "password"; // Hardcoded password for all student logins
 
-    // Matches emails like 23cs001@psgitech.ac.in, 24it123@psgitech.ac.in, etc.
-    const emailRegex = /^(2[0-5])[a-z]+([0-9]{1,3})@psgitech\.ac\.in$/i;
+    // Corrected Regex: Allows for patterns like '25cs240' or '25z240'
+    const emailRegex = /^(2[0-5])([a-z]+[0-9]{1,3}|[0-9]{1,3}[a-z]+)@psgitech\.ac\.in$/i;
     const match = email.match(emailRegex);
 
     if (!match) {
         toast({
             variant: "destructive",
             title: "Invalid Email Format",
-            description: "Please use your official student email, e.g., '23cs001@psgitech.ac.in'. Year must be 20-25.",
+            description: "Please use your official student email. Format: (year)(dept)(roll) or (year)(roll)(dept) e.g., '25cs240@psgitech.ac.in'. Year must be 20-25.",
         });
         setIsSubmitting(false);
         return;
     }
 
     try {
-      // 1. Always try to sign in first.
+      // 1. Always try to sign in first. This works for existing users.
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await handleLoginSuccess(userCredential);
 
     } catch (error: any) {
-      // 2. If sign-in fails because the user is not found, create a new account.
-      if (error.code === AuthErrorCodes.USER_DELETED || error.code === AuthErrorCodes.INVALID_credential || error.code === 'auth/user-not-found') {
+      // 2. If sign-in fails because the user is not found, it must be a first-time login.
+      // We use the same email and default password to create the account.
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
         try {
-          // Use the SAME password to create the account.
           const newUserCredential = await createUserWithEmailAndPassword(auth, email, password);
           await handleLoginSuccess(newUserCredential);
         } catch (signUpError: any) {
@@ -107,11 +107,20 @@ export default function StudentLoginPage() {
           });
         }
       } else {
-        // 3. Handle all other errors (wrong password for an existing but changed account, network issues, etc.)
+        // 3. Handle all other errors (network issues, account disabled, etc.)
+        let description = "An unexpected error occurred. Please try again.";
+        if (error.code === 'auth/wrong-password') {
+            description = "The password for this account may have been changed. The default password is 'password'.";
+        } else if (error.code === 'auth/too-many-requests') {
+            description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
+        } else {
+            description = error.message;
+        }
+
         toast({
           variant: "destructive",
           title: "Login Failed",
-          description: error.message || "An unexpected error occurred. Please try again.",
+          description: description,
         });
       }
     } finally {
