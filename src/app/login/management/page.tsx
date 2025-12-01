@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -10,17 +10,41 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
-import { useAuth } from "@/firebase/provider";
+import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blocking-login";
+import { useAuth, useFirestore } from "@/firebase/provider";
+import { doc } from "firebase/firestore";
+import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function ManagementLoginPage() {
   const router = useRouter();
   const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const [email, setEmail] = useState("management@psgitech.ac.in");
   const [password, setPassword] = useState("psg@123@Management");
   const [showPassword, setShowPassword] = useState(false);
+
+  // This effect will attempt to create the management user once.
+  // It will silently fail if the user already exists, which is fine.
+  useEffect(() => {
+    if (auth && firestore) {
+      initiateEmailSignUp(auth, "management@psgitech.ac.in", "psg@123@Management", "Management")
+        .then(userCredential => {
+            if (userCredential?.user) {
+                 const userDocRef = doc(firestore, "users", userCredential.user.uid);
+                 setDocumentNonBlocking(userDocRef, { 
+                    id: userCredential.user.uid,
+                    name: "Management",
+                    email: "management@psgitech.ac.in"
+                 }, { merge: true });
+            }
+        })
+        .catch(() => {
+          // Ignore errors (e.g., user already exists)
+        });
+    }
+  }, [auth, firestore]);
 
 
   const handleSubmit = (e: React.FormEvent) => {
