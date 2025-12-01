@@ -15,7 +15,7 @@ import { useAuth, useFirestore } from "@/firebase/provider";
 import { doc } from "firebase/firestore";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { Eye, EyeOff } from "lucide-react";
-import { AuthErrorCodes } from "firebase/auth";
+import { AuthErrorCodes, UserCredential } from "firebase/auth";
 
 export default function StudentLoginPage() {
   const router = useRouter();
@@ -26,6 +26,26 @@ export default function StudentLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleLoginSuccess = (userCredential: UserCredential) => {
+    if (!firestore || !userCredential.user) return;
+    
+    // Check if a user document already exists, if not create one.
+    // This is useful for users created directly via Auth console.
+    const userDocRef = doc(firestore, "users", userCredential.user.uid);
+    const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
+    setDocumentNonBlocking(userDocRef, {
+        id: userCredential.user.uid,
+        name: userCredential.user.displayName || studentName,
+        email: email
+    }, { merge: true }); // Use merge to avoid overwriting existing data
+
+    toast({
+        title: "Logged In!",
+        description: "Welcome!",
+    });
+    router.push('/vote?role=student');
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,55 +74,35 @@ export default function StudentLoginPage() {
         return;
     }
 
+    // Try to sign in first
     initiateEmailSignIn(auth, email, password)
-      .then(userCredential => {
-        toast({
-          title: "Logged In!",
-          description: "Welcome back!",
-        });
-        router.push('/vote?role=student');
-      })
+      .then(handleLoginSuccess)
       .catch(error => {
+        // If user does not exist, try to create an account with default password
         if (error.code === AuthErrorCodes.USER_NOT_FOUND) {
-            if (password !== 'password') {
-                toast({
+            if (password === 'password') {
+                const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
+                initiateEmailSignUp(auth, email, 'password', studentName)
+                    .then(handleLoginSuccess)
+                    .catch(signUpError => {
+                        toast({
+                            variant: "destructive",
+                            title: "Registration Failed",
+                            description: signUpError.message || "Could not create your account. Please try again.",
+                        });
+                    });
+            } else {
+                 toast({
                     variant: "destructive",
                     title: "First Time Login Failed",
-                    description: "For your first login, please use the default password 'password'.",
+                    description: "Your account does not exist. Please use the default password 'password' to create it.",
                 });
-                return;
             }
-          // User doesn't exist, so create a new account with the default password
-          const studentName = email.split('@')[0].replace('.', ' ').replace('_', ' '); // Simple name generation
-          initiateEmailSignUp(auth, email, 'password', studentName)
-            .then(userCredential => {
-              if (userCredential?.user) {
-                const userDocRef = doc(firestore, "users", userCredential.user.uid);
-                setDocumentNonBlocking(userDocRef, {
-                  id: userCredential.user.uid,
-                  name: studentName,
-                  email: email
-                }, {});
-                toast({
-                  title: "Account Created!",
-                  description: "Welcome! Your account has been created with the default password.",
-                });
-                router.push('/vote?role=student');
-              }
-            })
-            .catch(signUpError => {
-               // This can happen if there's a race condition or other issue
-               toast({
-                variant: "destructive",
-                title: "Sign Up Failed",
-                description: "Could not create your account. If you've already logged in once, please use your updated password.",
-              });
-            });
         } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             toast({
                 variant: "destructive",
                 title: "Login Failed",
-                description: "Incorrect password. If this is your first login, the password is 'password'. Otherwise, please use your updated password.",
+                description: "Incorrect password. If this is your first login, please use 'password'.",
             });
         }
         else {
