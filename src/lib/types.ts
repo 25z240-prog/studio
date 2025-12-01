@@ -6,7 +6,7 @@ export type NutritionInfo = {
   fat: string;
 };
 
-export type DietaryInfo = 'vegan' | 'vegetarian' | 'none';
+export type DietaryInfo = 'veg' | 'non-veg';
 
 export type MenuCategory = 'breakfast' | 'lunch' | 'snack' | 'dinner';
 

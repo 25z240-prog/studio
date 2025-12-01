@@ -48,7 +48,9 @@ const formSchema = z.object({
   ingredients: z.string().min(1, "Please list at least one ingredient."),
   instructions: z.string().min(10, "Instructions must be at least 10 characters."),
   imageUrl: z.string().url("Please enter a valid image URL."),
-  dietaryInfo: z.enum(["vegan", "vegetarian", "none"]),
+  dietaryInfo: z.enum(["veg", "non-veg"], {
+    required_error: "You need to select a dietary option."
+  }),
   calories: z.string().min(1, "Required"),
   protein: z.string().min(1, "Required"),
   carbs: z.string().min(1, "Required"),
@@ -73,7 +75,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
       ingredients: "",
       instructions: "",
       imageUrl: "",
-      dietaryInfo: "none",
+      dietaryInfo: "veg",
       calories: "",
       protein: "",
       carbs: "",
@@ -271,21 +273,15 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="none" />
+                          <RadioGroupItem value="veg" />
                         </FormControl>
-                        <FormLabel className="font-normal">None</FormLabel>
+                        <FormLabel className="font-normal">Veg</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="vegetarian" />
+                          <RadioGroupItem value="non-veg" />
                         </FormControl>
-                        <FormLabel className="font-normal">Vegetarian</FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="vegan" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Vegan</FormLabel>
+                        <FormLabel className="font-normal">Non-Veg</FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowUp, Leaf, Check, Trash2, RotateCcw } from "lucide-react";
+import { ArrowUp, Leaf, Check, Trash2, RotateCcw, Drumstick } from "lucide-react";
 import { type MenuItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -38,15 +38,23 @@ interface MenuItemCardProps {
 }
 
 const DietaryBadge: React.FC<{ info: MenuItem["dietaryInfo"] }> = ({ info }) => {
-  if (info === "none") return null;
-  const variant = info === "vegan" ? "bg-green-600 hover:bg-green-600" : "bg-yellow-600 hover:bg-yellow-600";
-  const text = info.charAt(0).toUpperCase() + info.slice(1);
-  return (
-    <Badge className={cn("text-white absolute top-3 right-3 border-0", variant)}>
-      <Leaf className="mr-1 h-3 w-3" />
-      {text}
-    </Badge>
-  );
+  if (info === "veg") {
+    return (
+      <Badge className={cn("text-white absolute top-3 right-3 border-0", "bg-green-600 hover:bg-green-600")}>
+        <Leaf className="mr-1 h-3 w-3" />
+        Veg
+      </Badge>
+    );
+  }
+  if (info === "non-veg") {
+    return (
+      <Badge className={cn("text-white absolute top-3 right-3 border-0", "bg-red-600 hover:bg-red-600")}>
+        <Drumstick className="mr-1 h-3 w-3" />
+        Non-Veg
+      </Badge>
+    );
+  }
+  return null;
 };
 
 
