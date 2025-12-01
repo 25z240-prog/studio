@@ -1,89 +1,33 @@
-/**
- * Core Philosophy: This ruleset enforces a strict user-ownership model for a hostel menu voting application.
- * Users have full control over their own profile, the menu items they submit, and the votes they cast.
- * The rules prioritize security and privacy by default, while allowing public read access for shared content.
- *
- * Data Structure:
- * - /users/{userId}: Private user profile data. A user can only manage their own profile.
- * - /menuItems/{menuItemId}: Publicly readable menu suggestions submitted by users.
- * - /menuItems/{menuItemId}/votes/{voteId}: Private votes cast by users on a specific menu item.
- *
- * Key Security Decisions:
- * - User and Vote Listing Disabled: To protect user privacy, it is not possible to list all users in the system or all votes for a given menu item.
- * - Public Menu Items: The `/menuItems` collection is publicly readable by anyone (including unauthenticated users) to allow browsing and discovery, but writable only by the original submitter.
- * - Owner-Only Modification: All write operations (create, update, delete) are strictly limited to the user who owns the data, enforced via denormalized ID fields (`submitterId`, `voterId`).
- *
- * Denormalization for Authorization:
- * This ruleset relies on denormalized ownership fields on documents to perform fast and secure authorization checks without needing costly `get()` calls.
- * - `MenuItem` documents contain a `submitterId`.
- * - `Vote` documents contain a `voterId`.
- * These fields are validated at creation and made immutable on update to ensure ownership cannot be transferred.
- *
- * Structural Segregation:
- * The data model separates public data (`/menuItems`) from private user-specific data (`/users` and the `/votes` subcollection). This simplifies security rules and makes querying safer and more performant.
- */
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // ----------------------------------------------------------------------
-    // Helper Functions
-    // ----------------------------------------------------------------------
-
-    /**
-     * Returns true if the user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
-
-    /**
-     * Returns true if the authenticated user's UID matches the provided userId.
-     */
     function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
-    
     function isManagement() {
       return request.auth.token.email == "management@psgitech.edu";
     }
-
-    /**
-     * Returns true if a document exists and the user is the owner.
-     * Used for secure update and delete operations.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
-
-    /**
-     * Validates that the user `id` field within a User document matches the
-     * user's UID path segment upon creation.
-     */
-    function hasCorrectUserIdOnCreate(userId) {
-      return request.resource.data.id == userId;
-    }
-
-    /**
-     * Ensures the user `id` field is immutable.
-     */
-    function userIdIsImmutable() {
-      return request.resource.data.id == resource.data.id;
-    }
-    
     match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if request.auth.uid == userId && request.resource.data.id == userId;
+      allow write: if isOwner(userId);
+    }
+    match /users/{userId}/votes/{voteId} {
       allow read, write: if isOwner(userId);
+    }
+    match /menuItems/{menuItemId} {
+      allow get, list: if isSignedIn();
+      allow create: if isManagement() && request.resource.data.submitterId == request.auth.uid;
+      allow update: if isManagement() && resource.data.submitterId == request.auth.uid;
+      allow delete: if isManagement() && resource.data.submitterId == request.auth.uid;
       
       match /votes/{voteId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isSignedIn() && request.resource.data.voterId == request.auth.uid;
       }
-    }
-
-    match /menuItems/{menuItemId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create, delete: if isManagement();
-      allow update: if isSignedIn();
     }
   }
 }

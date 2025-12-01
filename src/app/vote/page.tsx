@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, Suspense, useMemo } from "react";
@@ -55,9 +56,8 @@ function VotePageContent() {
     const menuItemRef = doc(firestore, "menuItems", itemId);
     const voteRef = doc(firestore, `users/${user.uid}/votes`, itemId);
 
-    // Optimistically update UI while firebase syncs in the background
     setDocumentNonBlocking(menuItemRef, { votes: increment(1) }, { merge: true });
-    setDocumentNonBlocking(voteRef, { menuItemId: itemId, votedAt: new Date() }, {merge: true});
+    setDocumentNonBlocking(voteRef, { menuItemId: itemId, voterId: user.uid, rank: 1, id: itemId }, {merge: true});
   };
 
   const handleRevokeVote = (itemId: string) => {
@@ -71,9 +71,9 @@ function VotePageContent() {
   };
 
   const handleAddItem = (newItemData: Omit<MenuItem, "id" | "votes">) => {
-    if (!firestore) return;
+    if (!firestore || !user) return;
     const menuItemsCollection = collection(firestore, 'menuItems');
-    addDocumentNonBlocking(menuItemsCollection, { ...newItemData, votes: 0 });
+    addDocumentNonBlocking(menuItemsCollection, { ...newItemData, votes: 0, submitterId: user.uid });
   };
 
   const handleDeleteItem = (itemId: string) => {
@@ -164,7 +164,7 @@ function VotePageContent() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Logged in as</p>
+                    <p className="text-sm font-medium leading-none">{user?.displayName || 'User'}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user?.email || (role === 'management' ? 'Management' : 'Student')}
                     </p>
