@@ -14,6 +14,7 @@ import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blockin
 import { useAuth, useFirestore } from "@/firebase/provider";
 import { doc } from "firebase/firestore";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function StudentLoginPage() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function StudentLoginPage() {
   const [name, setName] = useState("Test Student");
   const [email, setEmail] = useState("student@psgitech.ac.in");
   const [password, setPassword] = useState("password");
+  const [showPassword, setShowPassword] = useState(false);
 
   // This effect will attempt to create the management user once.
   // It will silently fail if the user already exists, which is fine.
@@ -119,9 +121,19 @@ export default function StudentLoginPage() {
               <Label htmlFor="email">Email</Label>
                <Input id="email" type="email" placeholder="student@psgitech.ac.in" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-2 relative">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required />
+               <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-[2.2rem] h-7 w-7"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+              </Button>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">

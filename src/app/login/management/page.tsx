@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
 import { useAuth } from "@/firebase/provider";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function ManagementLoginPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function ManagementLoginPage() {
   const { toast } = useToast();
   const [email, setEmail] = useState("management@psgitech.ac.in");
   const [password, setPassword] = useState("psg@123@Management");
+  const [showPassword, setShowPassword] = useState(false);
 
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -61,9 +63,19 @@ export default function ManagementLoginPage() {
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="m@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-2 relative">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-[2.2rem] h-7 w-7"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+              </Button>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
