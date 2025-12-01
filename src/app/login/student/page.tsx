@@ -72,9 +72,9 @@ export default function StudentLoginPage() {
                 });
                 return;
             }
-          // User doesn't exist, so create a new account
+          // User doesn't exist, so create a new account with the default password
           const studentName = email.split('@')[0].replace('.', ' ').replace('_', ' '); // Simple name generation
-          initiateEmailSignUp(auth, email, password, studentName)
+          initiateEmailSignUp(auth, email, 'password', studentName)
             .then(userCredential => {
               if (userCredential?.user) {
                 const userDocRef = doc(firestore, "users", userCredential.user.uid);
@@ -85,23 +85,24 @@ export default function StudentLoginPage() {
                 }, {});
                 toast({
                   title: "Account Created!",
-                  description: "Welcome! Your account has been created.",
+                  description: "Welcome! Your account has been created with the default password.",
                 });
                 router.push('/vote?role=student');
               }
             })
             .catch(signUpError => {
-              toast({
+               // This can happen if there's a race condition or other issue
+               toast({
                 variant: "destructive",
                 title: "Sign Up Failed",
-                description: signUpError.message || "Could not create your account.",
+                description: "Could not create your account. If you've already logged in once, please use your updated password.",
               });
             });
         } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             toast({
                 variant: "destructive",
                 title: "Login Failed",
-                description: "Incorrect password. If you have changed your password, please use the new one. Otherwise, use 'password'.",
+                description: "Incorrect password. If this is your first login, the password is 'password'. Otherwise, please use your updated password.",
             });
         }
         else {
