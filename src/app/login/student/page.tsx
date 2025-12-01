@@ -23,21 +23,22 @@ export default function StudentLoginPage() {
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
-  const password = "password"; // Hardcoded password
+  const password = "password"; // Hardcoded password for all student logins
 
   const handleLoginSuccess = (userCredential: UserCredential) => {
     if (!firestore || !userCredential.user) return;
     
+    // Redirect first
     router.push('/vote?role=student');
 
-    // Check if a user document already exists, if not create one.
+    // Set user document in the background
     const userDocRef = doc(firestore, "users", userCredential.user.uid);
     const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
     setDocumentNonBlocking(userDocRef, {
         id: userCredential.user.uid,
         name: userCredential.user.displayName || studentName,
         email: email
-    }, { merge: true }); // Use merge to avoid overwriting existing data
+    }, { merge: true });
 
     toast({
         title: "Logged In!",
@@ -49,7 +50,6 @@ export default function StudentLoginPage() {
     e.preventDefault();
     if (!auth || !firestore) return;
 
-    // Regex to validate the student email format
     const emailRegex = /^(2[0-5])[a-z]+([0-9]{1,3})@psgitech\.ac\.in$/i;
     const match = email.match(emailRegex);
 
@@ -76,7 +76,7 @@ export default function StudentLoginPage() {
     initiateEmailSignIn(auth, email, password)
       .then(handleLoginSuccess)
       .catch(error => {
-        // If user does not exist, try to create an account
+        // If user does not exist, create an account
         if (error.code === AuthErrorCodes.USER_NOT_FOUND) {
             const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
             initiateEmailSignUp(auth, email, password, studentName)
@@ -85,22 +85,15 @@ export default function StudentLoginPage() {
                     toast({
                         variant: "destructive",
                         title: "Registration Failed",
-                        description: signUpError.message || "Could not create your account. Please try again.",
+                        description: signUpError.message || "Could not create your account.",
                     });
                 });
-        } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-            toast({
-                variant: "destructive",
-                title: "Login Failed",
-                description: "Incorrect password. If you haven't changed it, the default password is 'password'.",
-            });
-        }
-        else {
-          // Handle other sign-in errors
+        } else {
+          // Handle other sign-in errors (like wrong password for an existing user, though this is less likely now)
           toast({
             variant: "destructive",
             title: "Login Failed",
-            description: error.message || "An unexpected error occurred. Please try again.",
+            description: error.message || "An unexpected error occurred.",
           });
         }
       });
