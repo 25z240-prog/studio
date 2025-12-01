@@ -1,0 +1,179 @@
+{
+  "entities": {
+    "MenuItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MenuItem",
+      "type": "object",
+      "description": "Represents a menu item proposed by a hostel resident.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the menu item."
+        },
+        "title": {
+          "type": "string",
+          "description": "The name of the menu item."
+        },
+        "ingredients": {
+          "type": "string",
+          "description": "A comma-separated list of ingredients in the menu item."
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "URL of the photo of the menu item.",
+          "format": "uri"
+        },
+        "preparationInstructions": {
+          "type": "string",
+          "description": "Detailed instructions on how to prepare the menu item."
+        },
+        "nutritionalFacts": {
+          "type": "string",
+          "description": "Nutritional information about the menu item."
+        },
+        "isVegan": {
+          "type": "boolean",
+          "description": "Indicates whether the menu item is vegan."
+        },
+        "isVegetarian": {
+          "type": "boolean",
+          "description": "Indicates whether the menu item is vegetarian."
+        },
+        "submitterId": {
+          "type": "string",
+          "description": "Reference to User who submitted this menu item. (Relationship: User 1:N MenuItem)"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "ingredients",
+        "photoUrl",
+        "preparationInstructions",
+        "nutritionalFacts",
+        "isVegan",
+        "isVegetarian",
+        "submitterId"
+      ]
+    },
+    "Vote": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vote",
+      "type": "object",
+      "description": "Represents a user's vote for a menu item.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the vote."
+        },
+        "menuItemId": {
+          "type": "string",
+          "description": "Reference to the MenuItem being voted on. (Relationship: MenuItem 1:N Vote)"
+        },
+        "voterId": {
+          "type": "string",
+          "description": "Reference to the User who cast the vote. (Relationship: User 1:N Vote)"
+        },
+        "rank": {
+          "type": "number",
+          "description": "The rank/score assigned to the menu item by the voter."
+        }
+      },
+      "required": [
+        "id",
+        "menuItemId",
+        "voterId",
+        "rank"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a hostel resident.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles.  User IDs are used as document IDs.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/menuItems/{menuItemId}",
+        "definition": {
+          "entityName": "MenuItem",
+          "schema": {
+            "$ref": "#/backend/entities/MenuItem"
+          },
+          "description": "Stores menu items proposed by users. Includes `submitterId` to denote the user who submitted the item.",
+          "params": [
+            {
+              "name": "menuItemId",
+              "description": "The unique identifier for the menu item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/menuItems/{menuItemId}/votes/{voteId}",
+        "definition": {
+          "entityName": "Vote",
+          "schema": {
+            "$ref": "#/backend/entities/Vote"
+          },
+          "description": "Stores votes for menu items. Includes `voterId` to track the user who cast the vote.",
+          "params": [
+            {
+              "name": "menuItemId",
+              "description": "The unique identifier for the menu item."
+            },
+            {
+              "name": "voteId",
+              "description": "The unique identifier for the vote."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support a hostel menu voting application with a focus on security, scalability, and ease of debugging. It leverages denormalization for authorization independence and structural segregation for simplified security rules. The core entities are `User`, `MenuItem`, and `Vote`.  User data is stored under the `/users/{userId}` path. Menu items, owned by users, are stored under `/menuItems/{menuItemId}`. This collection stores a `submitterId` to tie the `MenuItem` back to the `User`, but the security rule doesn't need to 'get()' the User document because the `submitterId` is present. Votes for each menu item are kept under `/menuItems/{menuItemId}/votes/{voteId}`. This structure enables performant `list` operations and simplifies security rule definitions.  This design enforces Authorization Independence, since the security rules for votes will rely on the `voterId` field within the `Vote` document itself to ensure that only the user who created the vote can modify/delete it. This avoids the need to `get()` the `User` document in the security rules."
+  }
+}

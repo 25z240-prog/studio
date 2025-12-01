@@ -1,0 +1,147 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership model for a hostel menu voting application.
+ * Users have full control over their own profile, the menu items they submit, and the votes they cast.
+ * The rules prioritize security and privacy by default, while allowing public read access for shared content.
+ *
+ * Data Structure:
+ * - /users/{userId}: Private user profile data. A user can only manage their own profile.
+ * - /menuItems/{menuItemId}: Publicly readable menu suggestions submitted by users.
+ * - /menuItems/{menuItemId}/votes/{voteId}: Private votes cast by users on a specific menu item.
+ *
+ * Key Security Decisions:
+ * - User and Vote Listing Disabled: To protect user privacy, it is not possible to list all users in the system or all votes for a given menu item.
+ * - Public Menu Items: The `/menuItems` collection is publicly readable by anyone (including unauthenticated users) to allow browsing and discovery, but writable only by the original submitter.
+ * - Owner-Only Modification: All write operations (create, update, delete) are strictly limited to the user who owns the data, enforced via denormalized ID fields (`submitterId`, `voterId`).
+ *
+ * Denormalization for Authorization:
+ * This ruleset relies on denormalized ownership fields on documents to perform fast and secure authorization checks without needing costly `get()` calls.
+ * - `MenuItem` documents contain a `submitterId`.
+ * - `Vote` documents contain a `voterId`.
+ * These fields are validated at creation and made immutable on update to ensure ownership cannot be transferred.
+ *
+ * Structural Segregation:
+ * The data model separates public data (`/menuItems`) from private user-specific data (`/users` and the `/votes` subcollection). This simplifies security rules and makes querying safer and more performant.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ----------------------------------------------------------------------
+    // Helper Functions
+    // ----------------------------------------------------------------------
+
+    /**
+     * Returns true if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Returns true if the authenticated user's UID matches the provided userId.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Returns true if a document exists and the user is the owner.
+     * Used for secure update and delete operations.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * Validates that the user `id` field within a User document matches the
+     * user's UID path segment upon creation.
+     */
+    function hasCorrectUserIdOnCreate(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * Ensures the user `id` field is immutable.
+     */
+    function userIdIsImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+    /**
+     * Validates that the `submitterId` of a new MenuItem matches the creator's auth UID.
+     */
+    function hasCorrectSubmitterOnCreate() {
+      return request.resource.data.submitterId == request.auth.uid;
+    }
+
+    /**
+     * Ensures the `submitterId` of a MenuItem cannot be changed after creation.
+     */
+    function submitterIsImmutable() {
+      return request.resource.data.submitterId == resource.data.submitterId;
+    }
+
+    /**
+     * Validates that a new Vote document has the correct `voterId` (the creator)
+     * and `menuItemId` (matching the path).
+     */
+    function hasCorrectVoteFieldsOnCreate(menuItemId) {
+      return request.resource.data.voterId == request.auth.uid
+          && request.resource.data.menuItemId == menuItemId;
+    }
+
+    /**
+     * Ensures that the core relational fields of a Vote are immutable.
+     */
+    function voteFieldsAreImmutable() {
+      return request.resource.data.voterId == resource.data.voterId
+          && request.resource.data.menuItemId == resource.data.menuItemId;
+    }
+
+
+    /**
+     * @description Rules for the User collection. Each document represents a user's profile.
+     * @path /users/{userId}
+     * @allow A signed-in user (auth.uid='user_abc') can (create) or (update) their own profile at `/users/user_abc`.
+     * @deny An anonymous user cannot read any profile. A signed-in user cannot list all users.
+     * @principle Restricts access to a user's own data tree and enforces relational integrity.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && hasCorrectUserIdOnCreate(userId);
+      allow update: if isOwner(userId) && userIdIsImmutable();
+      allow delete: if isOwner(userId);
+    }
+
+    /**
+     * @description Rules for the MenuItem collection. These are publicly viewable food suggestions.
+     * @path /menuItems/{menuItemId}
+     * @allow Anyone, including unauthenticated users, can (get) or (list) menu items. A user can (create) a menu item if they set themselves as the submitter.
+     * @deny A user cannot (update) or (delete) a menu item they did not submit.
+     * @principle Enforces a "Public Read with Owner-Only Writes" pattern using a denormalized `submitterId` field.
+     */
+    match /menuItems/{menuItemId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && hasCorrectSubmitterOnCreate();
+      allow update: if isExistingOwner(resource.data.submitterId) && submitterIsImmutable();
+      allow delete: if isExistingOwner(resource.data.submitterId);
+
+      /**
+       * @description Rules for the Vote subcollection. Each document is a user's private vote on a menu item.
+       * @path /menuItems/{menuItemId}/votes/{voteId}
+       * @allow A signed-in user (auth.uid='user_abc') can (create) their own vote. They can also (get), (update), or (delete) a vote they previously cast.
+       * @deny A user cannot see another user's vote. Listing all votes for a menu item is disabled for privacy.
+       * @principle Enforces strict document ownership. Prevents data leakage by disabling list operations.
+       */
+      match /votes/{voteId} {
+        allow get: if isOwner(resource.data.voterId);
+        allow list: if false;
+        allow create: if isSignedIn() && hasCorrectVoteFieldsOnCreate(menuItemId);
+        allow update: if isExistingOwner(resource.data.voterId) && voteFieldsAreImmutable();
+        allow delete: if isExistingOwner(resource.data.voterId);
+      }
+    }
+  }
+}
