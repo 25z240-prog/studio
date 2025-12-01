@@ -10,16 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth, useFirestore } from "@/firebase/provider";
+import { useAuth } from "@/firebase/provider";
 import { signInWithEmailAndPassword, UserCredential, AuthErrorCodes } from "firebase/auth";
 import { Eye, EyeOff } from "lucide-react";
-import { doc, setDoc } from "firebase/firestore";
 
 function EnterPasswordPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const auth = useAuth();
-    const firestore = useFirestore();
     const { toast } = useToast();
 
     const [password, setPassword] = useState("");
@@ -39,14 +37,6 @@ function EnterPasswordPageContent() {
         }
     }, [email, router, toast]);
 
-    const handleLoginSuccess = (userCredential: UserCredential) => {
-        toast({
-            title: "Success!",
-            description: "You are now logged in.",
-        });
-        router.push('/vote?role=student');
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!auth || !email) return;
@@ -54,8 +44,12 @@ function EnterPasswordPageContent() {
         setIsSubmitting(true);
 
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            handleLoginSuccess(userCredential);
+            await signInWithEmailAndPassword(auth, email, password);
+            toast({
+                title: "Success!",
+                description: "You are now logged in.",
+            });
+            router.push('/vote?role=student');
         } catch (error: any) {
             let description = "An unexpected error occurred. Please try again.";
             if (error.code === AuthErrorCodes.INVALID_PASSWORD || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
