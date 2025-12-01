@@ -34,8 +34,8 @@ function VotePageContent() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const menuItemsQuery = useMemoFirebase(() => 
-    firestore ? collection(firestore, 'menuItems') : null, 
-    [firestore]
+    firestore && !isUserLoading && user ? collection(firestore, 'menuItems') : null, 
+    [firestore, isUserLoading, user]
   );
   const { data: menuItems, isLoading: isLoadingMenu, error: menuItemsError } = useCollection<MenuItem>(menuItemsQuery);
   
