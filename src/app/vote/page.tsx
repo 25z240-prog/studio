@@ -11,7 +11,7 @@ import { initialMenuItems } from "@/lib/data";
 import { type MenuItem, type MenuCategory, type DayOfWeek } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
@@ -183,20 +183,28 @@ function VotePageContent() {
                 </Button>
               </AddMenuItemDialog>
             )}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <UserCircle className="h-8 w-8 text-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{role === 'management' ? 'Management' : 'Student'}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-             <Button variant="outline" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-            </Button>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">Logged in as</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {role === 'management' ? 'Management' : 'Student'}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
