@@ -20,8 +20,8 @@ export default function ManagementLoginPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const [email, setEmail] = useState("management@psgitech.ac.in");
-  const [password, setPassword] = useState("psg@123@Management");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,6 +57,8 @@ export default function ManagementLoginPage() {
       let description = "An unexpected error occurred. Please try again.";
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         description = "Incorrect email or password. Please try again.";
+      } else if (error.code === 'auth/too-many-requests') {
+        description = "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.";
       }
       toast({
           variant: "destructive",
@@ -85,7 +87,7 @@ export default function ManagementLoginPage() {
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isSubmitting} />
+              <Input id="email" type="email" placeholder="management@psgitech.ac.in" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isSubmitting} />
             </div>
             <div className="grid gap-2 relative">
               <Label htmlFor="password">Password</Label>
