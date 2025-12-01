@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
 import { Plus, LogOut } from "lucide-react";
@@ -12,14 +12,59 @@ import { type MenuItem } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+const LOCAL_STORAGE_KEY = 'hostelMenuItems';
+
 function VotePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const role = searchParams.get('role');
 
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(initialMenuItems);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [votedItems, setVotedItems] = useState<Set<string>>(new Set());
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const storedItems = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (storedItems) {
+        setMenuItems(JSON.parse(storedItems));
+      } else {
+        setMenuItems(initialMenuItems);
+      }
+    } catch (error) {
+      console.error("Could not load menu items from local storage", error);
+      setMenuItems(initialMenuItems);
+    } finally {
+        setIsLoaded(true);
+    }
+    
+    const storedVotedItems = localStorage.getItem('votedItems');
+    if(storedVotedItems) {
+        setVotedItems(new Set(JSON.parse(storedVotedItems)));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+        try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(menuItems));
+        } catch (error) {
+            console.error("Could not save menu items to local storage", error);
+        }
+    }
+  }, [menuItems, isLoaded]);
+  
+  useEffect(() => {
+    if(isLoaded) {
+      try {
+        localStorage.setItem('votedItems', JSON.stringify(Array.from(votedItems)));
+      } catch (error) {
+        console.error("Could not save voted items to local storage", error);
+      }
+    }
+  }, [votedItems, isLoaded]);
+
 
   const handleVote = (itemId: string) => {
     if (votedItems.has(itemId)) return;
@@ -46,8 +91,14 @@ function VotePageContent() {
   const showProposeButton = role === 'management';
 
   const handleLogout = () => {
+    // Voted items are cleared for the next user, but menu items persist.
+    localStorage.removeItem('votedItems');
     router.push('/login');
   };
+
+  if (!isLoaded) {
+    return <div className="flex min-h-screen w-full flex-col items-center justify-center"><p>Loading menu...</p></div>;
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col">
