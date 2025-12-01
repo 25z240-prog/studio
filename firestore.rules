@@ -19,8 +19,10 @@ service cloud.firestore {
     
     match /menuItems/{menuItemId} {
       allow list, get: if isSignedIn();
-      allow create, update, delete: if isManagement() && request.resource.data.submitterId == request.auth.uid;
-      
+      allow create, delete: if isManagement() && request.resource.data.submitterId == request.auth.uid;
+      allow update: if (isManagement() && request.resource.data.submitterId == request.auth.uid) ||
+                      (isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']));
+
       match /votes/{voteId} {
          allow create, update, delete: if isSignedIn() && request.resource.data.voterId == request.auth.uid;
          allow read: if isSignedIn() && isOwner(request.resource.data.voterId);
