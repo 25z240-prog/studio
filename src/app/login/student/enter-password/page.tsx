@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase/provider";
-import { signInWithEmailAndPassword, UserCredential, AuthErrorCodes } from "firebase/auth";
+import { signInWithEmailAndPassword, AuthErrorCodes } from "firebase/auth";
 import { Eye, EyeOff } from "lucide-react";
 
 function EnterPasswordPageContent() {
