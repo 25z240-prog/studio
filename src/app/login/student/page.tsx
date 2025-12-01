@@ -24,7 +24,7 @@ export default function StudentLoginPage() {
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("password");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,15 +40,6 @@ export default function StudentLoginPage() {
         return;
     }
 
-    if (password !== 'password') {
-        toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: "Please use the default password 'password' to log in for the first time. You can change it later.",
-        });
-        return;
-    }
-
     initiateEmailSignIn(auth, email, password)
       .then(userCredential => {
         toast({
@@ -59,6 +50,14 @@ export default function StudentLoginPage() {
       })
       .catch(error => {
         if (error.code === AuthErrorCodes.USER_NOT_FOUND) {
+            if (password !== 'password') {
+                toast({
+                    variant: "destructive",
+                    title: "First Time Login Failed",
+                    description: "For your first login, please use the default password 'password'.",
+                });
+                return;
+            }
           // User doesn't exist, so create a new account
           const studentName = email.split('@')[0].replace('.', ' ').replace('_', ' '); // Simple name generation
           initiateEmailSignUp(auth, email, password, studentName)
@@ -88,7 +87,7 @@ export default function StudentLoginPage() {
             toast({
                 variant: "destructive",
                 title: "Login Failed",
-                description: "Incorrect password. If you have changed your password, please use the new one. Otherwise, use the default 'password'.",
+                description: "Incorrect password. If you have changed your password, please use the new one. Otherwise, use 'password'.",
             });
         }
         else {
@@ -113,7 +112,7 @@ export default function StudentLoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-headline">Student Login</CardTitle>
-          <CardDescription>Enter your PSG iTech email to continue. Use 'password' for your first login.</CardDescription>
+          <CardDescription>Enter your PSG iTech email. Use 'password' for your first login.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-4">
@@ -123,7 +122,7 @@ export default function StudentLoginPage() {
             </div>
             <div className="grid gap-2 relative">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Enter your password" />
                <Button
                 type="button"
                 variant="ghost"
