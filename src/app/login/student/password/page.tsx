@@ -111,13 +111,26 @@ function PasswordPageContent() {
             } else if (error.code === 'auth/too-many-requests') {
                 description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
             } else if (error.code === 'auth/email-already-in-use' && !isNewUser) {
-                description = "This email is already registered. Please enter your password to log in.";
+                // This case should ideally not be hit if the previous page's logic is correct, but as a safeguard:
+                 try {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    await handleLoginSuccess(userCredential);
+                 } catch (signInError: any) {
+                    description = "This email is already registered. Please enter the correct password to log in.";
+                     toast({
+                        variant: "destructive",
+                        title: "Login Failed",
+                        description: signInError.message || description,
+                    });
+                 }
+                 setIsSubmitting(false);
+                 return;
             }
             
             toast({
                 variant: "destructive",
                 title: isNewUser ? "Registration Failed" : "Login Failed",
-                description: description,
+                description: error.message || description,
             });
         } finally {
             setIsSubmitting(false);
