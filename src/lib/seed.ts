@@ -1,7 +1,7 @@
 
 'use client';
 
-import { collection, writeBatch, getDocs, Firestore } from 'firebase/firestore';
+import { collection, writeBatch, getDocs, Firestore, doc } from 'firebase/firestore';
 import { initialMenuItems } from '@/lib/data';
 
 /**
@@ -22,7 +22,7 @@ export const seedDatabase = async (db: Firestore) => {
 
       initialMenuItems.forEach((item) => {
         // We can't know the doc ID beforehand, so Firestore will generate it.
-        const docRef = collection(db, 'menuItems').doc();
+        const docRef = doc(menuItemsCollection);
         batch.set(docRef, { ...item, votes: 0 }); // Ensure votes start at 0
       });
 
