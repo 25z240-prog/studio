@@ -67,7 +67,11 @@ export default function StudentLoginPage() {
         localStorage.removeItem("student_email");
       }
       
-      router.push(`/login/student/password?email=${encodeURIComponent(email)}&isNewUser=${isNewUser}`);
+      if (isNewUser) {
+        router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
+      } else {
+        router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
+      }
 
     } catch (error: any) {
       toast({

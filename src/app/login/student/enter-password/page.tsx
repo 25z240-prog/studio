@@ -11,19 +11,16 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase/provider";
-import { doc, setDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, updateProfile, UserCredential, AuthErrorCodes } from "firebase/auth";
+import { signInWithEmailAndPassword, UserCredential, AuthErrorCodes } from "firebase/auth";
 import { Eye, EyeOff } from "lucide-react";
 
-function CreatePasswordPageContent() {
+function EnterPasswordPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const auth = useAuth();
-    const firestore = useFirestore();
     const { toast } = useToast();
 
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,39 +37,12 @@ function CreatePasswordPageContent() {
         }
     }, [email, router, toast]);
 
-    const handleLoginSuccess = async (userCredential: UserCredential) => {
-        if (!firestore || !userCredential.user) return;
-        
-        const user = userCredential.user;
-        const studentName = user.email!.split('@')[0];
-
-        try {
-            if (!user.displayName) {
-                await updateProfile(user, { displayName: studentName });
-            }
-            
-            const userDocRef = doc(firestore, "users", user.uid);
-            await setDoc(userDocRef, {
-                id: user.uid,
-                name: studentName,
-                email: user.email
-            }, { merge: true });
-
-            toast({
-                title: "Account Created!",
-                description: "You are now logged in.",
-            });
-            
-            router.push('/vote?role=student');
-
-        } catch (error) {
-            console.error("Error during profile update or firestore write:", error);
-            toast({
-                variant: "destructive",
-                title: "Setup Failed",
-                description: "Your account was created, but we couldn't save your profile details. Please try refreshing the page.",
-            });
-        }
+    const handleLoginSuccess = (userCredential: UserCredential) => {
+        toast({
+            title: "Success!",
+            description: "You are now logged in.",
+        });
+        router.push('/vote?role=student');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -81,30 +51,22 @@ function CreatePasswordPageContent() {
 
         setIsSubmitting(true);
 
-        if (password !== confirmPassword) {
-            toast({
-                variant: "destructive",
-                title: "Passwords do not match",
-                description: "Please re-enter your password and confirm it.",
-            });
-            setIsSubmitting(false);
-            return;
-        }
-
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await handleLoginSuccess(userCredential);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            handleLoginSuccess(userCredential);
         } catch (error: any) {
             let description = "An unexpected error occurred. Please try again.";
-            if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
-                description = "Your password is too weak. Please choose a stronger one with at least 6 characters.";
-            } else if (error.code === 'auth/email-already-in-use') {
-                description = "This email is already registered. Please go back and log in.";
-                router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
+            if (error.code === AuthErrorCodes.INVALID_PASSWORD || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                description = "The password you entered is incorrect. Please try again.";
+            } else if (error.code === 'auth/user-not-found') {
+                description = "This account does not exist. Please go back and create an account.";
+                router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
+            } else if (error.code === 'auth/too-many-requests') {
+                description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
             }
             toast({
                 variant: "destructive",
-                title: "Registration Failed",
+                title: "Login Failed",
                 description: description,
             });
         } finally {
@@ -123,10 +85,10 @@ function CreatePasswordPageContent() {
             <Card className="w-full max-w-sm">
                 <CardHeader className="text-center">
                     <CardTitle className="text-2xl font-headline">
-                        Create Your Password
+                        Welcome Back!
                     </CardTitle>
                     <CardDescription>
-                        You're new here! Set a password for {email}.
+                        Enter your password for {email} to sign in.
                     </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
@@ -146,14 +108,10 @@ function CreatePasswordPageContent() {
                                 <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
                             </Button>
                         </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="confirm-password">Confirm Password</Label>
-                            <Input id="confirm-password" type={showPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={isSubmitting} />
-                        </div>
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4">
                         <Button className="w-full" type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? "Creating Account..." : "Create Account & Login"}
+                            {isSubmitting ? "Logging In..." : "Login"}
                         </Button>
                         <Button variant="link" size="sm" asChild>
                             <Link href="/login/student">Back to email</Link>
@@ -165,10 +123,10 @@ function CreatePasswordPageContent() {
     );
 }
 
-export default function StudentCreatePasswordPage() {
+export default function StudentEnterPasswordPage() {
     return (
       <Suspense fallback={<div>Loading...</div>}>
-        <CreatePasswordPageContent />
+        <EnterPasswordPageContent />
       </Suspense>
     );
 }
