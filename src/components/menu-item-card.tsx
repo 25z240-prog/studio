@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowUp, Leaf, Check } from "lucide-react";
+import { ArrowUp, Leaf, Check, Trash2 } from "lucide-react";
 import { type MenuItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -15,12 +15,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface MenuItemCardProps {
   item: MenuItem;
   rank: number;
   onVote: () => void;
   isVoted: boolean;
+  onDeleteItem: () => void;
+  role: string | null;
 }
 
 const DietaryBadge: React.FC<{ info: MenuItem["dietaryInfo"] }> = ({ info }) => {
@@ -36,7 +49,7 @@ const DietaryBadge: React.FC<{ info: MenuItem["dietaryInfo"] }> = ({ info }) => 
 };
 
 
-export default function MenuItemCard({ item, rank, onVote, isVoted }: MenuItemCardProps) {
+export default function MenuItemCard({ item, rank, onVote, isVoted, onDeleteItem, role }: MenuItemCardProps) {
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
       <CardHeader className="p-0 relative">
@@ -96,15 +109,42 @@ export default function MenuItemCard({ item, rank, onVote, isVoted }: MenuItemCa
                 <p className="text-xs text-muted-foreground">Current Rank</p>
             </div>
         </div>
-        <Button 
-          onClick={onVote} 
-          disabled={isVoted}
-          className="bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed" 
-          aria-label={`Vote for ${item.title}`}
-        >
-          {isVoted ? <Check className="mr-2 h-4 w-4"/> : <ArrowUp className="mr-2 h-4 w-4" />}
-          {isVoted ? 'Voted' : 'Vote'}
-        </Button>
+        <div className="flex items-center gap-2">
+          {role === 'management' && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="destructive" 
+                  size="icon"
+                  aria-label={`Delete ${item.title}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the menu item &quot;{item.title}&quot;.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={onDeleteItem}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          <Button 
+            onClick={onVote} 
+            disabled={isVoted || role === 'management'}
+            className="bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed" 
+            aria-label={`Vote for ${item.title}`}
+          >
+            {isVoted ? <Check className="mr-2 h-4 w-4"/> : <ArrowUp className="mr-2 h-4 w-4" />}
+            {isVoted ? 'Voted' : 'Vote'}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

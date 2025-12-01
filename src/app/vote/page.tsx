@@ -67,7 +67,7 @@ function VotePageContent() {
 
 
   const handleVote = (itemId: string) => {
-    if (votedItems.has(itemId)) return;
+    if (votedItems.has(itemId) || role === 'management') return;
 
     setMenuItems((currentItems) =>
       currentItems.map((item) =>
@@ -84,6 +84,12 @@ function VotePageContent() {
       votes: 0,
     };
     setMenuItems((currentItems) => [fullNewItem, ...currentItems]);
+  };
+
+  const handleDeleteItem = (itemId: string) => {
+    setMenuItems((currentItems) =>
+      currentItems.filter((item) => item.id !== itemId)
+    );
   };
   
   const sortedMenuItems = [...menuItems].sort((a, b) => b.votes - a.votes);
@@ -150,6 +156,8 @@ function VotePageContent() {
                   rank={index + 1}
                   onVote={() => handleVote(item.id)}
                   isVoted={votedItems.has(item.id)}
+                  onDeleteItem={() => handleDeleteItem(item.id)}
+                  role={role}
                 />
               ))}
             </div>
