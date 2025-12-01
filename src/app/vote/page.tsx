@@ -4,7 +4,7 @@
 import { useState, useEffect, Suspense, useMemo } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
-import { Plus, LogOut, UserCircle, DatabaseZap } from "lucide-react";
+import { Plus, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
@@ -16,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth, useFirebase, useCollection, useMemoFirebase } from "@/firebase";
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { collection, doc, increment } from "firebase/firestore";
-import { seedDatabase } from "@/lib/seed";
 import { useToast } from "@/hooks/use-toast";
 
 
@@ -86,22 +85,6 @@ function VotePageContent() {
     deleteDocumentNonBlocking(menuItemRef);
   };
 
-  const handleSeedDatabase = async () => {
-    if (!firestore || !user) return;
-    try {
-      await seedDatabase(firestore, user.uid);
-      toast({
-        title: "Database Seeded!",
-        description: "The default menu items have been added.",
-      });
-    } catch (e) {
-       toast({
-        variant: "destructive",
-        title: "Seeding Failed",
-        description: "Could not add default menu items.",
-      });
-    }
-  };
   
   const sortedMenuItems = useMemo(() => 
     [...(menuItems || [])].sort((a, b) => b.votes - a.votes),
@@ -245,7 +228,7 @@ function VotePageContent() {
                     No menu items proposed yet.
                 </h3>
                 <p className="text-muted-foreground mt-2">
-                    {showProposeButton ? "The menu is empty. Seed the database with default items to get started." : "No items have been proposed for voting yet."}
+                    {showProposeButton ? "The menu is empty. Propose a new item to get started." : "No items have been proposed for voting yet."}
                 </p>
                 {showProposeButton && (
                   <div className="flex gap-4 mt-6">
@@ -259,10 +242,6 @@ function VotePageContent() {
                           Propose an Item
                       </Button>
                     </AddMenuItemDialog>
-                    <Button onClick={handleSeedDatabase} variant="secondary">
-                      <DatabaseZap className="mr-2 h-4 w-4" />
-                      Seed Menu
-                    </Button>
                   </div>
                 )}
             </div>
