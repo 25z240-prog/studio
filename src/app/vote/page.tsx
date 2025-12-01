@@ -123,7 +123,7 @@ function VotePageContent() {
 
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-background/50 backdrop-blur-lg">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/login" className="flex items-center gap-3">
              <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={32} height={32} alt="PSG iTech Logo" />
@@ -204,7 +204,7 @@ function VotePageContent() {
           )}
         </section>
       </main>
-      <footer className="py-6 md:px-8 md:py-0 border-t">
+      <footer className="py-6 md:px-8 md:py-0 border-t border-white/10">
         <div className="container flex flex-col items-center justify-center gap-4 md:h-24 md:flex-row">
           <p className="text-center text-sm leading-loose text-muted-foreground">
             Built for the PSG iTech hostel community. All rights reserved.

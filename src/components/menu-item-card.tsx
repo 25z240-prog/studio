@@ -52,7 +52,7 @@ const DietaryBadge: React.FC<{ info: MenuItem["dietaryInfo"] }> = ({ info }) => 
 
 export default function MenuItemCard({ item, rank, onVote, onRevokeVote, isVoted, onDeleteItem, role }: MenuItemCardProps) {
   return (
-    <Card className="flex flex-col overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+    <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
       <CardHeader className="p-0 relative">
         <Image
           src={item.imageUrl}
@@ -64,7 +64,7 @@ export default function MenuItemCard({ item, rank, onVote, onRevokeVote, isVoted
         />
         <DietaryBadge info={item.dietaryInfo} />
       </CardHeader>
-      <CardContent className="flex-1 p-4">
+      <CardContent className="flex-1 p-4 bg-transparent">
         <CardTitle className="font-headline text-xl mb-1">{item.title}</CardTitle>
         <CardDescription>{item.description}</CardDescription>
         
@@ -92,7 +92,7 @@ export default function MenuItemCard({ item, rank, onVote, onRevokeVote, isVoted
           </TabsContent>
         </Tabs>
       </CardContent>
-      <CardFooter className="p-4 bg-muted/50 flex justify-between items-center">
+      <CardFooter className="p-4 bg-transparent border-t flex justify-between items-center">
         <div className="flex items-center gap-2">
             <div 
                 className={cn(

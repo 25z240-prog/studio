@@ -4,13 +4,14 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  background-image: linear-gradient(to bottom right, hsl(224, 71%, 10%), hsl(224, 71%, 4%));
 }
 
 @layer base {
   :root {
     --background: 224 71% 4%;
     --foreground: 0 0% 98%;
-    --card: 222 84% 5%;
+    --card: 222 84% 10% / 0.5;
     --card-foreground: 0 0% 98%;
     --popover: 222 84% 5%;
     --popover-foreground: 0 0% 98%;
@@ -24,7 +25,7 @@ body {
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 217 33% 17%;
+    --border: 217 33% 25%;
     --input: 217 33% 17%;
     --ring: 217 91% 60%;
     --chart-1: 220 70% 50%;
@@ -45,7 +46,7 @@ body {
   .dark {
     --background: 224 71% 4%;
     --foreground: 0 0% 98%;
-    --card: 222 84% 5%;
+    --card: 222 84% 10% / 0.5;
     --card-foreground: 0 0% 98%;
     --popover: 222 84% 5%;
     --popover-foreground: 0 0% 98%;
@@ -59,7 +60,7 @@ body {
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 217 33% 17%;
+    --border: 217 33% 25%;
     --input: 217 33% 17%;
     --ring: 217 91% 60%;
     --chart-1: 220 70% 50%;
@@ -83,6 +84,6 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-transparent text-foreground;
   }
 }
