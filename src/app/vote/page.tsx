@@ -18,6 +18,7 @@ import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocki
 import { collection, doc, increment } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { sendPasswordResetEmail } from "firebase/auth";
+import { seedDatabase } from "@/lib/seed";
 
 
 const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -45,6 +46,12 @@ function VotePageContent() {
     [firestore, user]
   );
   const { data: userVotes, isLoading: isLoadingVotes } = useCollection(votesQuery);
+
+  useEffect(() => {
+    if (firestore && !isLoadingMenu && menuItems?.length === 0) {
+      seedDatabase(firestore);
+    }
+  }, [firestore, menuItems, isLoadingMenu]);
 
   const votedItems = useMemo(() => new Set(userVotes?.map(v => v.menuItemId) || []), [userVotes]);
 
@@ -257,25 +264,11 @@ function VotePageContent() {
                     <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={48} height={48} alt="PSG iTech Logo" />
                 </div>
                 <h3 className="text-2xl font-bold tracking-tight font-headline text-foreground">
-                    No menu items proposed yet.
+                    Loading initial menu...
                 </h3>
                 <p className="text-muted-foreground mt-2">
-                    {showProposeButton ? "The menu is empty. Propose a new item to get started." : "No items have been proposed for voting yet."}
+                    Please wait a moment while we set up the menu for the first time.
                 </p>
-                {showProposeButton && (
-                  <div className="flex gap-4 mt-6">
-                    <AddMenuItemDialog
-                      onAddItem={handleAddItem}
-                      open={isDialogOpen}
-                      onOpenChange={setIsDialogOpen}
-                      >
-                      <Button>
-                          <Plus className="mr-2 h-4 w-4" />
-                          Propose an Item
-                      </Button>
-                    </AddMenuItemDialog>
-                  </div>
-                )}
             </div>
           )}
         </section>
