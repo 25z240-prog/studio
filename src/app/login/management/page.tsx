@@ -25,18 +25,7 @@ export default function ManagementLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLoginSuccess = async (userCredential: UserCredential) => {
-    if (!firestore) return;
-    const user = userCredential.user;
-
-    // Ensure a user document exists for management
-    const userDocRef = doc(firestore, "users", user.uid);
-    await setDoc(userDocRef, {
-        id: user.uid,
-        name: "Management",
-        email: user.email
-    }, { merge: true });
-
+  const handleLoginSuccess = (userCredential: UserCredential) => {
     toast({
         title: "Login Successful",
         description: "Redirecting to the dashboard.",
@@ -52,7 +41,20 @@ export default function ManagementLoginPage() {
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      await handleLoginSuccess(userCredential);
+      
+      // Ensure a user document exists for management.
+      // This is a good practice to ensure consistency.
+      if (firestore) {
+        const user = userCredential.user;
+        const userDocRef = doc(firestore, "users", user.uid);
+        await setDoc(userDocRef, {
+            id: user.uid,
+            name: "Management",
+            email: user.email
+        }, { merge: true });
+      }
+
+      handleLoginSuccess(userCredential);
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
