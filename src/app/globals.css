@@ -4,6 +4,7 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  @apply bg-gradient-to-br from-purple-200 via-pink-200 to-orange-200;
 }
 
 @layer base {
