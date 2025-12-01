@@ -21,8 +21,8 @@ export default function StudentLoginPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSignUp, setIsSignUp] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("student@psgitech.edu");
+  const [name, setName] = useState("Test Student");
+  const [email, setEmail] = useState("student@psgitech.ac.in");
   const [password, setPassword] = useState("password");
 
 
@@ -106,7 +106,7 @@ export default function StudentLoginPage() {
             )}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-               <Input id="email" type="email" placeholder="student@psgitech.edu" value={email} onChange={(e) => setEmail(e.target.value)} required />
+               <Input id="email" type="email" placeholder="student@psgitech.ac.in" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>

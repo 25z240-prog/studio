@@ -11,14 +11,14 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
-import { useAuth, useFirestore } from "@/firebase/provider";
+import { useAuth } from "@/firebase/provider";
 
 export default function ManagementLoginPage() {
   const router = useRouter();
   const auth = useAuth();
   const { toast } = useToast();
-  const [email, setEmail] = useState("management@psgitech.edu");
-  const [password, setPassword] = useState("password");
+  const [email, setEmail] = useState("management@psgitech.ac.in");
+  const [password, setPassword] = useState("psg@123@Management");
 
 
   const handleSubmit = (e: React.FormEvent) => {
