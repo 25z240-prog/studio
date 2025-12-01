@@ -7,44 +7,51 @@ service cloud.firestore {
     }
 
     function isStudent() {
-      return request.auth.token.email.matches('.*@psgitech\\.ac\\.in$');
+      return isSignedIn() && request.auth.token.email.matches('.*@psgitech\\.ac\\.in$');
     }
     
     function isOwner(userId) {
-      return request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
     
     function isManagement() {
-      return request.auth.token.email == "management@psgitech.ac.in";
+      return isSignedIn() && request.auth.token.email == "management@psgitech.ac.in";
     }
 
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow create: if isOwner(userId);
-      allow write: if isOwner(userId);
+      allow create: if isOwner(userId); // User can create their own document
+      allow write: if isOwner(userId); // User can update their own document
     }
     
     match /menuItems/{menuItemId} {
       allow list, get: if isSignedIn();
-      allow create, delete: if isManagement() && request.resource.data.submitterId == request.auth.uid;
+      allow create: if isManagement() && request.resource.data.submitterId == request.auth.uid;
+      allow delete: if isManagement();
+      
       allow update: if (isManagement() && request.resource.data.submitterId == request.auth.uid) ||
-                      (isStudent() && 
+                      (isStudent() &&
+                       // Ensure only the 'votes' field is being changed
                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']) &&
                        (
-                         // Allow incrementing votes
+                         // Allow incrementing votes by 1
                          request.resource.data.votes == resource.data.votes + 1 ||
-                         // Allow decrementing votes only if current votes > 0
+                         // Allow decrementing votes by 1 only if current votes > 0
                          (request.resource.data.votes == resource.data.votes - 1 && resource.data.votes > 0)
                        )
                       );
 
       match /votes/{voteId} {
+         // Students can only manage their own votes
          allow create, update, delete: if isStudent() && request.resource.data.voterId == request.auth.uid;
+         // A user can only read their own vote document
          allow read: if isSignedIn() && isOwner(request.resource.data.voterId);
       }
     }
     
+     // This collection stores which menu items a user has voted for
      match /users/{userId}/votes/{voteId} {
+      // A user can only read and write to their own votes subcollection
       allow read, write: if isOwner(userId);
     }
   }

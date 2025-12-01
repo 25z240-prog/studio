@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useAuth } from "@/firebase/provider";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -21,30 +21,34 @@ export default function ManagementLoginPage() {
   const [email, setEmail] = useState("management@psgitech.ac.in");
   const [password, setPassword] = useState("psg@123@Management");
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth) return;
     
-    initiateEmailSignIn(auth, email, password)
-      .then(() => {
-        router.push('/vote?role=management');
-        toast({
-            title: "Logging in...",
-            description: "Please wait while we log you in as management.",
-        });
-      })
-      .catch((error) => {
-        let description = "An unexpected error occurred.";
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-          description = "Incorrect email or password. Please try again.";
-        }
-        toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: description,
-        });
+    setIsSubmitting(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+          title: "Login Successful",
+          description: "Redirecting to the dashboard.",
       });
+      router.push('/vote?role=management');
+    } catch (error: any) {
+      let description = "An unexpected error occurred. Please try again.";
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        description = "Incorrect email or password. Please try again.";
+      }
+      toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: description,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -64,17 +68,18 @@ export default function ManagementLoginPage() {
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input id="email" type="email" placeholder="m@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isSubmitting} />
             </div>
             <div className="grid gap-2 relative">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isSubmitting} />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 className="absolute right-1 top-[2.2rem] h-7 w-7"
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={isSubmitting}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
@@ -82,7 +87,9 @@ export default function ManagementLoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button className="w-full" type="submit">Login</Button>
+            <Button className="w-full" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Logging in..." : "Login"}
+            </Button>
              <Button variant="link" size="sm" asChild>
                 <Link href="/login">Back to role selection</Link>
             </Button>
