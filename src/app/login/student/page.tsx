@@ -11,8 +11,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase/provider";
-import { doc } from "firebase/firestore";
-import { setDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, AuthErrorCodes, UserCredential } from "firebase/auth";
 
 export default function StudentLoginPage() {
@@ -24,33 +23,32 @@ export default function StudentLoginPage() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // This function is called after a successful sign-in or sign-up
+  // This function is called ONLY after a successful sign-in or sign-up
   const handleLoginSuccess = async (userCredential: UserCredential) => {
     if (!firestore) return;
     
     const user = userCredential.user;
-    const isNewUser = userCredential.operationType === 'signIn' ? false : true;
-
+    
     // Sanitize email to create a display name, e.g., '23cs001' -> '23cs 001'
-    const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
+    const studentName = user.email!.split('@')[0].replace(/[\._]/g, ' ');
     
     try {
-      // If it's a new user or their profile name is not set, update it
-      if (isNewUser || !user.displayName) {
+      // If the user's profile name is not set, update it.
+      if (!user.displayName) {
         await updateProfile(user, { displayName: studentName });
       }
       
-      // Create or update the user document in Firestore
+      // Create or update the user document in Firestore to be safe
       const userDocRef = doc(firestore, "users", user.uid);
       await setDoc(userDocRef, {
           id: user.uid,
           name: studentName,
-          email: email
+          email: user.email
       }, { merge: true });
 
       toast({
           title: "Logged In!",
-          description: "Welcome!",
+          description: "Redirecting to the voting page...",
       });
 
       router.push('/vote?role=student');
@@ -62,6 +60,8 @@ export default function StudentLoginPage() {
           title: "Setup Failed",
           description: "Your account was created, but we couldn't save your profile. Please try logging in again.",
       });
+      // Log the user out to avoid being in a broken state
+      auth?.signOut();
     }
   }
 
@@ -73,28 +73,30 @@ export default function StudentLoginPage() {
 
     const password = "password"; // Hardcoded password for all student logins
 
-    const emailRegex = /^(2[0-9])[a-z]+([0-9]{1,3})@psgitech\.ac\.in$/i;
+    // Matches emails like 23cs001@psgitech.ac.in, 24it123@psgitech.ac.in, etc.
+    const emailRegex = /^(2[0-5])[a-z]+([0-9]{1,3})@psgitech\.ac\.in$/i;
     const match = email.match(emailRegex);
 
     if (!match) {
         toast({
             variant: "destructive",
             title: "Invalid Email Format",
-            description: "Please use your official student email, e.g., '23cs001@psgitech.ac.in'.",
+            description: "Please use your official student email, e.g., '23cs001@psgitech.ac.in'. Year must be 20-25.",
         });
         setIsSubmitting(false);
         return;
     }
 
     try {
-      // 1. Always try to sign in first
+      // 1. Always try to sign in first.
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await handleLoginSuccess(userCredential);
 
     } catch (error: any) {
-      // 2. If user not found, create a new account
-      if (error.code === AuthErrorCodes.USER_DELETED || error.code === AuthErrorCodes.USER_NOT_FOUND) {
+      // 2. If sign-in fails because the user is not found, create a new account.
+      if (error.code === AuthErrorCodes.USER_DELETED || error.code === AuthErrorCodes.INVALID_credential || error.code === 'auth/user-not-found') {
         try {
+          // Use the SAME password to create the account.
           const newUserCredential = await createUserWithEmailAndPassword(auth, email, password);
           await handleLoginSuccess(newUserCredential);
         } catch (signUpError: any) {
@@ -104,14 +106,8 @@ export default function StudentLoginPage() {
             description: signUpError.message || "Could not create your account. Please try again.",
           });
         }
-      } else if (error.code === AuthErrorCodes.INVALID_PASSWORD || error.code === AuthErrorCodes.WRONG_PASSWORD) {
-         toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: "The password for this account is incorrect. Please contact management if you changed it and need a reset.",
-          });
       } else {
-        // 3. Handle other errors
+        // 3. Handle all other errors (wrong password for an existing but changed account, network issues, etc.)
         toast({
           variant: "destructive",
           title: "Login Failed",
