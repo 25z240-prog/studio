@@ -77,6 +77,21 @@ function VotePageContent() {
     setVotedItems(prev => new Set(prev).add(itemId));
   };
 
+  const handleRevokeVote = (itemId: string) => {
+    if (!votedItems.has(itemId) || role === 'management') return;
+
+    setMenuItems((currentItems) =>
+      currentItems.map((item) =>
+        item.id === itemId ? { ...item, votes: Math.max(0, item.votes - 1) } : item
+      )
+    );
+    setVotedItems(prev => {
+        const newVoted = new Set(prev);
+        newVoted.delete(itemId);
+        return newVoted;
+    });
+  };
+
   const handleAddItem = (newItemData: Omit<MenuItem, "id" | "votes">) => {
     const fullNewItem: MenuItem = {
       ...newItemData,
@@ -155,6 +170,7 @@ function VotePageContent() {
                   item={item} 
                   rank={index + 1}
                   onVote={() => handleVote(item.id)}
+                  onRevokeVote={() => handleRevokeVote(item.id)}
                   isVoted={votedItems.has(item.id)}
                   onDeleteItem={() => handleDeleteItem(item.id)}
                   role={role}
