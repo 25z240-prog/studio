@@ -25,29 +25,21 @@ export default function ManagementLoginPage() {
     e.preventDefault();
     if (!auth) return;
     
-    try {
-        initiateEmailSignIn(auth, email, password)
-         .then(() => {
-            toast({
-                title: "Logging in...",
-                description: "Please wait while we log you in as management.",
-            });
-            router.push('/vote?role=management');
-         })
-         .catch(error => {
-            toast({
-                variant: "destructive",
-                title: "Login Failed",
-                description: "Incorrect email or password. Please try again.",
-            });
-         });
-    } catch (error: any) {
+    initiateEmailSignIn(auth, email, password)
+      .then(() => {
+        toast({
+            title: "Logging in...",
+            description: "Please wait while we log you in as management.",
+        });
+        router.push('/vote?role=management');
+      })
+      .catch(error => {
         toast({
             variant: "destructive",
             title: "Login Failed",
-            description: error.message || "An unexpected error occurred.",
+            description: "Incorrect email or password. Please try again.",
         });
-    }
+      });
   };
 
   return (
