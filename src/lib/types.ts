@@ -1,3 +1,4 @@
+
 export type NutritionInfo = {
   calories: string;
   protein: string;
@@ -24,4 +25,5 @@ export type MenuItem = {
   dietaryInfo: DietaryInfo;
   nutrition: NutritionInfo;
   votes: number;
+  submitterId?: string;
 };

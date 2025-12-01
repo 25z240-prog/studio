@@ -4,7 +4,7 @@
 import { useState, useEffect, Suspense, useMemo } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
-import { Plus, LogOut, UserCircle } from "lucide-react";
+import { Plus, LogOut, UserCircle, DatabaseZap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
@@ -16,6 +16,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth, useFirebase, useCollection, useMemoFirebase } from "@/firebase";
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { collection, doc, increment } from "firebase/firestore";
+import { seedDatabase } from "@/lib/seed";
+import { useToast } from "@/hooks/use-toast";
+
 
 const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const categories: MenuCategory[] = ['breakfast', 'lunch', 'snack', 'dinner'];
@@ -27,6 +30,7 @@ function VotePageContent() {
   
   const { firestore, user, isUserLoading } = useFirebase();
   const auth = useAuth();
+  const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
@@ -34,7 +38,7 @@ function VotePageContent() {
     firestore ? collection(firestore, 'menuItems') : null, 
     [firestore]
   );
-  const { data: menuItems, isLoading: isLoadingMenu } = useCollection<MenuItem>(menuItemsQuery);
+  const { data: menuItems, isLoading: isLoadingMenu, error: menuItemsError } = useCollection<MenuItem>(menuItemsQuery);
   
   const votesQuery = useMemoFirebase(() =>
     firestore && user ? collection(firestore, `users/${user.uid}/votes`) : null,
@@ -80,6 +84,23 @@ function VotePageContent() {
     if (!firestore) return;
     const menuItemRef = doc(firestore, "menuItems", itemId);
     deleteDocumentNonBlocking(menuItemRef);
+  };
+
+  const handleSeedDatabase = async () => {
+    if (!firestore || !user) return;
+    try {
+      await seedDatabase(firestore, user.uid);
+      toast({
+        title: "Database Seeded!",
+        description: "The default menu items have been added.",
+      });
+    } catch (e) {
+       toast({
+        variant: "destructive",
+        title: "Seeding Failed",
+        description: "Could not add default menu items.",
+      });
+    }
   };
   
   const sortedMenuItems = useMemo(() => 
@@ -224,19 +245,25 @@ function VotePageContent() {
                     No menu items proposed yet.
                 </h3>
                 <p className="text-muted-foreground mt-2">
-                    {showProposeButton ? "Be the first to propose a delicious new dish for the menu!" : "No items have been proposed for voting yet."}
+                    {showProposeButton ? "The menu is empty. Seed the database with default items to get started." : "No items have been proposed for voting yet."}
                 </p>
                 {showProposeButton && (
+                  <div className="flex gap-4 mt-6">
                     <AddMenuItemDialog
-                    onAddItem={handleAddItem}
-                    open={isDialogOpen}
-                    onOpenChange={setIsDialogOpen}
-                    >
-                    <Button className="mt-6">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Propose an Item
-                    </Button>
+                      onAddItem={handleAddItem}
+                      open={isDialogOpen}
+                      onOpenChange={setIsDialogOpen}
+                      >
+                      <Button>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Propose an Item
+                      </Button>
                     </AddMenuItemDialog>
+                    <Button onClick={handleSeedDatabase} variant="secondary">
+                      <DatabaseZap className="mr-2 h-4 w-4" />
+                      Seed Menu
+                    </Button>
+                  </div>
                 )}
             </div>
           )}

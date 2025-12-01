@@ -1,3 +1,4 @@
+
 import { type MenuItem } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -5,9 +6,8 @@ const getImage = (id: string) => {
   return PlaceHolderImages.find(img => img.id === id)?.imageUrl || `https://picsum.photos/seed/${id}/600/400`;
 };
 
-export const initialMenuItems: MenuItem[] = [
+export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
   {
-    id: '1',
     title: 'Masala Dosa',
     description: 'A crispy and savory crepe made from fermented rice and lentil batter, filled with a spiced potato mash. A South Indian classic.',
     category: 'breakfast',
@@ -18,10 +18,9 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'masala dosa',
     dietaryInfo: 'vegetarian',
     nutrition: { calories: '380 kcal', protein: '8g', carbs: '65g', fat: '10g' },
-    votes: 45,
+    submitterId: 'management',
   },
   {
-    id: '2',
     title: 'Idli with Sambar & Chutney',
     description: 'Soft, fluffy steamed rice cakes made from a fermented rice and lentil batter. Served with a flavorful lentil-based vegetable stew (sambar) and coconut chutney.',
     category: 'breakfast',
@@ -32,10 +31,9 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'idli sambar',
     dietaryInfo: 'vegan',
     nutrition: { calories: '250 kcal', protein: '10g', carbs: '45g', fat: '5g' },
-    votes: 62,
+    submitterId: 'management',
   },
   {
-    id: '3',
     title: 'Ven Pongal',
     description: 'A savory and comforting South Indian breakfast dish made from rice and yellow moong dal, cooked to a creamy consistency and tempered with spices.',
     category: 'breakfast',
@@ -46,10 +44,9 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'pongal dish',
     dietaryInfo: 'vegetarian',
     nutrition: { calories: '450 kcal', protein: '15g', carbs: '60g', fat: '18g' },
-    votes: 38,
+    submitterId: 'management',
   },
   {
-    id: '4',
     title: 'Bisi Bele Bath',
     description: 'A traditional Karnataka dish, this is a flavorful and aromatic rice, lentil, and vegetable medley, cooked with a special spice blend (bisi bele bath powder).',
     category: 'lunch',
@@ -60,10 +57,9 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'rice dish',
     dietaryInfo: 'vegetarian',
     nutrition: { calories: '550 kcal', protein: '20g', carbs: '80g', fat: '15g' },
-    votes: 29,
+    submitterId: 'management',
   },
   {
-    id: '5',
     title: 'Lemon Rice (Chitranna)',
     description: 'A tangy, flavorful, and light rice dish from South India. Cooked rice is tossed with a tempering of spices and a generous amount of lemon juice.',
     category: 'lunch',
@@ -74,10 +70,9 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'lemon rice',
     dietaryInfo: 'vegan',
     nutrition: { calories: '400 kcal', protein: '9g', carbs: '75g', fat: '8g' },
-    votes: 51,
+    submitterId: 'management',
   },
   {
-    id: '6',
     title: 'Poori Masala',
     description: 'Fluffy, deep-fried bread (poori) served with a savory and mildly spiced potato curry (masala). A popular and beloved breakfast combination.',
     category: 'breakfast',
@@ -88,10 +83,9 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'poori masala',
     dietaryInfo: 'vegetarian',
     nutrition: { calories: '450 kcal', protein: '10g', carbs: '70g', fat: '15g' },
-    votes: 55,
+    submitterId: 'management',
   },
   {
-    id: '7',
     title: 'Chapathi with Kurma',
     description: 'Soft, unleavened flatbreads (chapathi) served with a rich and creamy mixed vegetable curry (kurma) made with a coconut-based gravy.',
     category: 'dinner',
@@ -102,10 +96,9 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'chapathi kurma',
     dietaryInfo: 'vegetarian',
     nutrition: { calories: '500 kcal', protein: '15g', carbs: '80g', fat: '15g' },
-    votes: 48,
+    submitterId: 'management',
   },
   {
-    id: '8',
     title: 'Sambar Rice',
     description: 'A wholesome and flavorful one-pot meal where rice and lentils are cooked together with a variety of vegetables and aromatic sambar powder.',
     category: 'lunch',
@@ -116,10 +109,9 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'sambar rice',
     dietaryInfo: 'vegetarian',
     nutrition: { calories: '480 kcal', protein: '18g', carbs: '90g', fat: '8g' },
-    votes: 35,
+    submitterId: 'management',
   },
   {
-    id: '9',
     title: 'Onion Pakoda',
     description: 'Crispy and crunchy fritters made with thinly sliced onions mixed in a spiced gram flour batter and deep-fried until golden brown. A perfect evening snack.',
     category: 'snack',
@@ -130,10 +122,9 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'onion pakoda',
     dietaryInfo: 'vegan',
     nutrition: { calories: '300 kcal', protein: '8g', carbs: '35g', fat: '15g' },
-    votes: 72,
+    submitterId: 'management',
   },
   {
-    id: '10',
     title: 'Ghee Roast Dosa',
     description: 'A super crispy, cone-shaped dosa cooked with a generous amount of ghee until it turns a deep golden-brown. Famous for its rich flavor and crisp texture.',
     category: 'breakfast',
@@ -144,6 +135,6 @@ export const initialMenuItems: MenuItem[] = [
     imageHint: 'ghee roast',
     dietaryInfo: 'vegetarian',
     nutrition: { calories: '420 kcal', protein: '7g', carbs: '55g', fat: '20g' },
-    votes: 81,
+    submitterId: 'management',
   }
 ];
