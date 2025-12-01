@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase/provider";
 import { fetchSignInMethodsForEmail } from "firebase/auth";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function StudentLoginPage() {
   const router = useRouter();
@@ -19,7 +20,25 @@ export default function StudentLoginPage() {
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("student_email");
+    if (storedEmail) {
+      setEmail(storedEmail);
+      setRememberMe(true);
+    } else {
+      setRememberMe(false);
+    }
+  }, []);
+
+  const handleRememberMeChange = (checked: boolean) => {
+    setRememberMe(checked);
+    if (!checked) {
+      localStorage.removeItem("student_email");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +60,12 @@ export default function StudentLoginPage() {
     try {
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
       const isNewUser = signInMethods.length === 0;
+
+      if (rememberMe) {
+        localStorage.setItem("student_email", email);
+      } else {
+        localStorage.removeItem("student_email");
+      }
       
       router.push(`/login/student/password?email=${encodeURIComponent(email)}&isNewUser=${isNewUser}`);
 
@@ -72,6 +97,12 @@ export default function StudentLoginPage() {
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
                <Input id="email" type="email" placeholder="yourname@psgitech.ac.in" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isSubmitting}/>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={handleRememberMeChange} disabled={isSubmitting}/>
+              <Label htmlFor="remember-me" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Remember me
+              </Label>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
