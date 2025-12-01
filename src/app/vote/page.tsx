@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
-import { Plus, LogOut } from "lucide-react";
+import { Plus, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
@@ -11,6 +11,7 @@ import { initialMenuItems } from "@/lib/data";
 import { type MenuItem } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const LOCAL_STORAGE_KEY = 'hostelMenuItems';
 
@@ -123,7 +124,7 @@ function VotePageContent() {
 
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-background/50 backdrop-blur-lg">
+      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-card/50 backdrop-blur-lg">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/login" className="flex items-center gap-3">
              <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={32} height={32} alt="PSG iTech Logo" />
@@ -144,6 +145,16 @@ function VotePageContent() {
                 </Button>
               </AddMenuItemDialog>
             )}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <UserCircle className="h-8 w-8 text-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{role === 'management' ? 'Management' : 'Student'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
              <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
@@ -153,7 +164,7 @@ function VotePageContent() {
       </header>
       <main className="flex-1">
         <section className="container mx-auto px-4 py-8 md:py-12">
-          <div className="text-center mb-12">
+        <div className="text-center mb-12">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-headline text-foreground">
               Weekly Menu Proposals
             </h2>
