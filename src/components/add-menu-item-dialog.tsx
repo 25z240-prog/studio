@@ -27,11 +27,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { type MenuItem } from "@/lib/types";
+import { type MenuItem, type MenuCategory } from "@/lib/types";
 
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
+  category: z.enum(["breakfast", "lunch", "snack", "dinner"], {
+    required_error: "You need to select a category."
+  }),
   ingredients: z.string().min(1, "Please list at least one ingredient."),
   instructions: z.string().min(10, "Instructions must be at least 10 characters."),
   imageUrl: z.string().url("Please enter a valid image URL."),
@@ -79,6 +82,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
         const newItem = {
           title: values.title,
           description: values.description,
+          category: values.category as MenuCategory,
           ingredients: values.ingredients.split(",").map((i) => i.trim()),
           instructions: values.instructions,
           imageUrl: values.imageUrl,
@@ -159,6 +163,48 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                   <FormDescription>
                     Please provide a direct link to an image of the dish.
                   </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Category</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex flex-row space-x-4"
+                    >
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="breakfast" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Breakfast</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="lunch" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Lunch</FormLabel>
+                      </FormItem>
+                       <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="snack" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Snack</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="dinner" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Dinner</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

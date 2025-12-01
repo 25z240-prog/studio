@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
 import { initialMenuItems } from "@/lib/data";
-import { type MenuItem } from "@/lib/types";
+import { type MenuItem, type MenuCategory } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 const LOCAL_STORAGE_KEY = 'hostelMenuItems';
 
@@ -117,6 +119,40 @@ function VotePageContent() {
     localStorage.removeItem('votedItems');
     router.push('/login');
   };
+  
+  const renderCategory = (category: MenuCategory) => {
+    const categoryItems = sortedMenuItems.filter(item => item.category === category);
+
+    if (categoryItems.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-12 text-center mt-6">
+            <h3 className="text-2xl font-bold tracking-tight font-headline text-foreground">
+                No {category} items proposed yet.
+            </h3>
+            <p className="text-muted-foreground mt-2">
+                {showProposeButton ? "Propose a dish to get started!" : `Check back later for ${category} proposals.`}
+            </p>
+        </div>
+      );
+    }
+
+    return (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
+            {categoryItems.map((item, index) => (
+            <MenuItemCard 
+                key={item.id} 
+                item={item} 
+                rank={sortedMenuItems.findIndex(sortedItem => sortedItem.id === item.id) + 1}
+                onVote={() => handleVote(item.id)}
+                onRevokeVote={() => handleRevokeVote(item.id)}
+                isVoted={votedItems.has(item.id)}
+                onDeleteItem={() => handleDeleteItem(item.id)}
+                role={role}
+            />
+            ))}
+        </div>
+    );
+  };
 
   if (!isLoaded) {
     return <div className="flex min-h-screen w-full flex-col items-center justify-center"><p>Loading menu...</p></div>;
@@ -173,21 +209,19 @@ function VotePageContent() {
             </p>
           </div>
 
-          {sortedMenuItems.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {sortedMenuItems.map((item, index) => (
-                <MenuItemCard 
-                  key={item.id} 
-                  item={item} 
-                  rank={index + 1}
-                  onVote={() => handleVote(item.id)}
-                  onRevokeVote={() => handleRevokeVote(item.id)}
-                  isVoted={votedItems.has(item.id)}
-                  onDeleteItem={() => handleDeleteItem(item.id)}
-                  role={role}
-                />
-              ))}
-            </div>
+          {menuItems.length > 0 ? (
+             <Tabs defaultValue="breakfast" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="breakfast">Breakfast</TabsTrigger>
+                    <TabsTrigger value="lunch">Lunch</TabsTrigger>
+                    <TabsTrigger value="snack">Snack</TabsTrigger>
+                    <TabsTrigger value="dinner">Dinner</TabsTrigger>
+                </TabsList>
+                <TabsContent value="breakfast">{renderCategory('breakfast')}</TabsContent>
+                <TabsContent value="lunch">{renderCategory('lunch')}</TabsContent>
+                <TabsContent value="snack">{renderCategory('snack')}</TabsContent>
+                <TabsContent value="dinner">{renderCategory('dinner')}</TabsContent>
+            </Tabs>
           ) : (
              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-12 text-center">
                 <div className="mb-4 rounded-full bg-muted p-4">
