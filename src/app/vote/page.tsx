@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
 import { initialMenuItems } from "@/lib/data";
-import { type MenuItem, type MenuCategory } from "@/lib/types";
+import { type MenuItem, type MenuCategory, type DayOfWeek } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -16,6 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 const LOCAL_STORAGE_KEY = 'hostelMenuItems';
+const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const categories: MenuCategory[] = ['breakfast', 'lunch', 'snack', 'dinner'];
 
 function VotePageContent() {
   const searchParams = useSearchParams();
@@ -120,17 +122,17 @@ function VotePageContent() {
     router.push('/login');
   };
   
-  const renderCategory = (category: MenuCategory) => {
-    const categoryItems = sortedMenuItems.filter(item => item.category === category);
+  const renderCategory = (day: DayOfWeek, category: MenuCategory) => {
+    const categoryItems = sortedMenuItems.filter(item => item.day === day && item.category === category);
 
     if (categoryItems.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-12 text-center mt-6">
-            <h3 className="text-2xl font-bold tracking-tight font-headline text-foreground">
-                No {category} items proposed yet.
+            <h3 className="text-xl font-bold tracking-tight font-headline text-foreground">
+                No {category} items for {day}.
             </h3>
             <p className="text-muted-foreground mt-2">
-                {showProposeButton ? "Propose a dish to get started!" : `Check back later for ${category} proposals.`}
+                {showProposeButton ? "Propose a dish to get started!" : `Check back later.`}
             </p>
         </div>
       );
@@ -138,7 +140,7 @@ function VotePageContent() {
 
     return (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
-            {categoryItems.map((item, index) => (
+            {categoryItems.map((item) => (
             <MenuItemCard 
                 key={item.id} 
                 item={item} 
@@ -210,17 +212,28 @@ function VotePageContent() {
           </div>
 
           {menuItems.length > 0 ? (
-             <Tabs defaultValue="breakfast" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="breakfast">Breakfast</TabsTrigger>
-                    <TabsTrigger value="lunch">Lunch</TabsTrigger>
-                    <TabsTrigger value="snack">Snack</TabsTrigger>
-                    <TabsTrigger value="dinner">Dinner</TabsTrigger>
+             <Tabs defaultValue="monday" className="w-full">
+                <TabsList className="grid w-full grid-cols-7">
+                    {daysOfWeek.map(day => (
+                        <TabsTrigger key={day} value={day} className="capitalize">{day}</TabsTrigger>
+                    ))}
                 </TabsList>
-                <TabsContent value="breakfast">{renderCategory('breakfast')}</TabsContent>
-                <TabsContent value="lunch">{renderCategory('lunch')}</TabsContent>
-                <TabsContent value="snack">{renderCategory('snack')}</TabsContent>
-                <TabsContent value="dinner">{renderCategory('dinner')}</TabsContent>
+                {daysOfWeek.map(day => (
+                  <TabsContent key={day} value={day}>
+                    <Tabs defaultValue="breakfast" className="w-full mt-4">
+                      <TabsList className="grid w-full grid-cols-4">
+                          {categories.map(category => (
+                            <TabsTrigger key={category} value={category} className="capitalize">{category}</TabsTrigger>
+                          ))}
+                      </TabsList>
+                      {categories.map(category => (
+                          <TabsContent key={category} value={category}>
+                              {renderCategory(day, category)}
+                          </TabsContent>
+                      ))}
+                    </Tabs>
+                  </TabsContent>
+                ))}
             </Tabs>
           ) : (
              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-12 text-center">

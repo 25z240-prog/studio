@@ -26,12 +26,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { type MenuItem, type MenuCategory } from "@/lib/types";
+import { type MenuItem, type MenuCategory, type DayOfWeek } from "@/lib/types";
 
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
+  day: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"], {
+    required_error: "You need to select a day."
+  }),
   category: z.enum(["breakfast", "lunch", "snack", "dinner"], {
     required_error: "You need to select a category."
   }),
@@ -82,6 +92,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
         const newItem = {
           title: values.title,
           description: values.description,
+          day: values.day as DayOfWeek,
           category: values.category as MenuCategory,
           ingredients: values.ingredients.split(",").map((i) => i.trim()),
           instructions: values.instructions,
@@ -167,48 +178,59 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                 </FormItem>
               )}
             />
-             <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Category</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-row space-x-4"
-                    >
-                      <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="breakfast" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Breakfast</FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="lunch" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Lunch</FormLabel>
-                      </FormItem>
-                       <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="snack" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Snack</FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="dinner" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Dinner</FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+            <div className="grid grid-cols-2 gap-4">
+               <FormField
+                control={form.control}
+                name="day"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Day of the Week</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a day" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="monday">Monday</SelectItem>
+                        <SelectItem value="tuesday">Tuesday</SelectItem>
+                        <SelectItem value="wednesday">Wednesday</SelectItem>
+                        <SelectItem value="thursday">Thursday</SelectItem>
+                        <SelectItem value="friday">Friday</SelectItem>
+                        <SelectItem value="saturday">Saturday</SelectItem>
+                        <SelectItem value="sunday">Sunday</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="breakfast">Breakfast</SelectItem>
+                        <SelectItem value="lunch">Lunch</SelectItem>
+                        <SelectItem value="snack">Snack</SelectItem>
+                        <SelectItem value="dinner">Dinner</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
             <FormField
               control={form.control}
               name="ingredients"
@@ -245,7 +267,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="flex flex-col space-y-1"
+                      className="flex flex-row space-x-4"
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
