@@ -29,6 +29,8 @@ export default function StudentLoginPage() {
 
   const handleLoginSuccess = (userCredential: UserCredential) => {
     if (!firestore || !userCredential.user) return;
+
+    router.push('/vote?role=student');
     
     // Check if a user document already exists, if not create one.
     // This is useful for users created directly via Auth console.
@@ -44,7 +46,6 @@ export default function StudentLoginPage() {
         title: "Logged In!",
         description: "Welcome!",
     });
-    router.push('/vote?role=student');
   }
 
   const handleSubmit = (e: React.FormEvent) => {

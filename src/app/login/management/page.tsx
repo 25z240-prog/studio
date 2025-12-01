@@ -28,11 +28,11 @@ export default function ManagementLoginPage() {
     
     initiateEmailSignIn(auth, email, password)
       .then(() => {
+        router.push('/vote?role=management');
         toast({
             title: "Logging in...",
             description: "Please wait while we log you in as management.",
         });
-        router.push('/vote?role=management');
       })
       .catch((error) => {
         let description = "An unexpected error occurred.";
