@@ -44,8 +44,6 @@ function PasswordPageContent() {
     const handleLoginSuccess = async (userCredential: UserCredential) => {
         if (!firestore || !userCredential.user) return;
         
-        router.push('/vote?role=student');
-        
         const user = userCredential.user;
         const studentName = user.email!.split('@')[0];
 
@@ -67,6 +65,8 @@ function PasswordPageContent() {
                 title: "Success!",
                 description: "You are now logged in.",
             });
+            
+            router.push('/vote?role=student');
 
         } catch (error) {
             console.error("Error during profile update or firestore write:", error);
@@ -110,21 +110,8 @@ function PasswordPageContent() {
                 description = "Your password is too weak. Please choose a stronger one with at least 6 characters.";
             } else if (error.code === 'auth/too-many-requests') {
                 description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
-            } else if (error.code === 'auth/email-already-in-use' && !isNewUser) {
-                // This case should ideally not be hit if the previous page's logic is correct, but as a safeguard:
-                 try {
-                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                    await handleLoginSuccess(userCredential);
-                 } catch (signInError: any) {
-                    description = "This email is already registered. Please enter the correct password to log in.";
-                     toast({
-                        variant: "destructive",
-                        title: "Login Failed",
-                        description: signInError.message || description,
-                    });
-                 }
-                 setIsSubmitting(false);
-                 return;
+            } else if (error.code === 'auth/email-already-in-use') {
+                description = "This email is already registered. Please login with your password.";
             }
             
             toast({
@@ -200,5 +187,3 @@ export default function StudentPasswordPage() {
       </Suspense>
     );
   }
-
-    
