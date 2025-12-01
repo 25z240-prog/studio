@@ -29,7 +29,9 @@ export const seedDatabase = async (db: Firestore) => {
       await batch.commit();
       console.log('Database seeded successfully!');
       // Reload the page to show the new data
-      window.location.reload();
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
     } else {
       console.log('Menu items already exist. No seeding necessary.');
     }

@@ -16,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth, useFirebase, useCollection, useMemoFirebase } from "@/firebase";
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { collection, doc, increment } from "firebase/firestore";
-import { seedDatabase } from "@/lib/seed";
 
 
 const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -43,12 +42,6 @@ function VotePageContent() {
     [firestore, user]
   );
   const { data: userVotes, isLoading: isLoadingVotes } = useCollection(votesQuery);
-
-  useEffect(() => {
-    if (firestore && !isLoadingMenu && menuItems?.length === 0) {
-      seedDatabase(firestore);
-    }
-  }, [firestore, menuItems, isLoadingMenu]);
 
   const votedItems = useMemo(() => new Set(userVotes?.map(v => v.menuItemId) || []), [userVotes]);
 
@@ -230,10 +223,10 @@ function VotePageContent() {
                     <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={48} height={48} alt="PSG iTech Logo" />
                 </div>
                 <h3 className="text-2xl font-bold tracking-tight font-headline text-foreground">
-                    Loading initial menu...
+                    No menu items have been proposed yet.
                 </h3>
                 <p className="text-muted-foreground mt-2">
-                    Please wait a moment while we set up the menu for the first time.
+                    {showProposeButton ? "As management, you can be the first to propose a dish!" : "Please check back later to see the menu proposals."}
                 </p>
             </div>
           )}
