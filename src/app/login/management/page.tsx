@@ -10,53 +10,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blocking-login";
+import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
 import { useAuth, useFirestore } from "@/firebase/provider";
-import { doc } from "firebase/firestore";
-import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 export default function ManagementLoginPage() {
   const router = useRouter();
   const auth = useAuth();
-  const firestore = useFirestore();
   const { toast } = useToast();
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("management@psgitech.edu");
   const [password, setPassword] = useState("password");
 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth || !firestore) return;
+    if (!auth) return;
     
     try {
-      if (isSignUp) {
-         initiateEmailSignUp(auth, email, password, name)
-          .then(userCredential => {
-            if (userCredential?.user) {
-                const userDocRef = doc(firestore, "users", userCredential.user.uid);
-                setDocumentNonBlocking(userDocRef, { 
-                  id: userCredential.user.uid,
-                  name: name,
-                  email: email 
-                }, {});
-                toast({
-                    title: "Account Created!",
-                    description: "Management account successfully created.",
-                });
-                router.push('/vote?role=management');
-            }
-          })
-          .catch(error => {
-             toast({
-                variant: "destructive",
-                title: "Sign Up Failed",
-                description: error.message || "An unexpected error occurred.",
-            });
-          });
-
-      } else {
         initiateEmailSignIn(auth, email, password)
          .then(() => {
             toast({
@@ -69,14 +38,13 @@ export default function ManagementLoginPage() {
             toast({
                 variant: "destructive",
                 title: "Login Failed",
-                description: "User does not exist or incorrect password.",
+                description: "Incorrect email or password. Please try again.",
             });
          });
-      }
     } catch (error: any) {
         toast({
             variant: "destructive",
-            title: isSignUp ? "Sign Up Failed" : "Login Failed",
+            title: "Login Failed",
             description: error.message || "An unexpected error occurred.",
         });
     }
@@ -92,17 +60,11 @@ export default function ManagementLoginPage() {
         </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">{isSignUp ? 'Create Management Account' : 'Management Login'}</CardTitle>
-          <CardDescription>{isSignUp ? 'Enter details for the new management account.' : 'Enter your credentials to view the dashboard.'}</CardDescription>
+          <CardTitle className="text-2xl font-headline">Management Login</CardTitle>
+          <CardDescription>Enter your credentials to view the dashboard.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-4">
-             {isSignUp && (
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" placeholder="Management Name" value={name} onChange={(e) => setName(e.target.value)} required />
-              </div>
-            )}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="m@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
@@ -113,10 +75,7 @@ export default function ManagementLoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button className="w-full" type="submit">{isSignUp ? 'Sign Up' : 'Login'}</Button>
-             <Button variant="link" size="sm" type="button" onClick={() => setIsSignUp(!isSignUp)}>
-                {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
-            </Button>
+            <Button className="w-full" type="submit">Login</Button>
              <Button variant="link" size="sm" asChild>
                 <Link href="/login">Back to role selection</Link>
             </Button>
