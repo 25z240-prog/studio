@@ -155,9 +155,14 @@ function CreatePasswordPageContent() {
                         <Button className="w-full" type="submit" disabled={isSubmitting}>
                             {isSubmitting ? "Creating Account..." : "Create Account & Login"}
                         </Button>
-                        <Button variant="link" size="sm" asChild>
-                            <Link href="/login/student">Back to email</Link>
-                        </Button>
+                        <div className="flex justify-between w-full">
+                             <Button variant="link" size="sm" asChild>
+                                <Link href="/login/student">Back to email</Link>
+                            </Button>
+                             <Button variant="link" size="sm" asChild>
+                                <Link href={`/login/student/enter-password?email=${encodeURIComponent(email || '')}`}>Already have an account? Log in</Link>
+                            </Button>
+                        </div>
                     </CardFooter>
                 </form>
             </Card>
