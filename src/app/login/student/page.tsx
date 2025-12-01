@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blocking-login";
+import { initiateEmailSignIn, initiateEmailSignUp, updateUserProfile } from "@/firebase/non-blocking-login";
 import { useAuth, useFirestore } from "@/firebase/provider";
 import { doc } from "firebase/firestore";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
@@ -23,20 +23,25 @@ export default function StudentLoginPage() {
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
-  const password = "password"; // Hardcoded password for all student logins
 
   const handleLoginSuccess = (userCredential: UserCredential) => {
     if (!firestore || !userCredential.user) return;
     
-    // Redirect first
     router.push('/vote?role=student');
 
-    // Set user document in the background
-    const userDocRef = doc(firestore, "users", userCredential.user.uid);
+    const user = userCredential.user;
     const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
+    
+    // Ensure display name is set on the auth object
+    if (!user.displayName) {
+      updateUserProfile(user, { displayName: studentName });
+    }
+
+    // Set user document in the background
+    const userDocRef = doc(firestore, "users", user.uid);
     setDocumentNonBlocking(userDocRef, {
-        id: userCredential.user.uid,
-        name: userCredential.user.displayName || studentName,
+        id: user.uid,
+        name: studentName,
         email: email
     }, { merge: true });
 
@@ -49,6 +54,8 @@ export default function StudentLoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth || !firestore) return;
+
+    const password = "password"; // Hardcoded password for all student logins
 
     const emailRegex = /^(2[0-5])[a-z]+([0-9]{1,3})@psgitech\.ac\.in$/i;
     const match = email.match(emailRegex);
@@ -89,11 +96,11 @@ export default function StudentLoginPage() {
                     });
                 });
         } else {
-          // Handle other sign-in errors (like wrong password for an existing user, though this is less likely now)
+          // Handle other sign-in errors
           toast({
             variant: "destructive",
             title: "Login Failed",
-            description: error.message || "An unexpected error occurred.",
+            description: "An unexpected error occurred. Please try again.",
           });
         }
       });
