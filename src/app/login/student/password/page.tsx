@@ -43,18 +43,20 @@ function PasswordPageContent() {
 
     const handleLoginSuccess = async (userCredential: UserCredential) => {
         if (!firestore || !userCredential.user) return;
-
+        
         router.push('/vote?role=student');
         
         const user = userCredential.user;
         const studentName = user.email!.split('@')[0];
 
         try {
+            // Only update profile if the display name is not already set
             if (!user.displayName) {
                 await updateProfile(user, { displayName: studentName });
             }
             
             const userDocRef = doc(firestore, "users", user.uid);
+            // Use setDoc with merge:true to create or update the user document
             await setDoc(userDocRef, {
                 id: user.uid,
                 name: studentName,
@@ -68,10 +70,11 @@ function PasswordPageContent() {
 
         } catch (error) {
             console.error("Error during profile update or firestore write:", error);
+            // This toast is for a failure after a successful login
             toast({
                 variant: "destructive",
                 title: "Setup Failed",
-                description: "You are logged in, but we couldn't save your profile. Please try refreshing the page.",
+                description: "You are logged in, but we couldn't save your profile details. Please try refreshing the page.",
             });
         }
     };
@@ -107,7 +110,10 @@ function PasswordPageContent() {
                 description = "Your password is too weak. Please choose a stronger one with at least 6 characters.";
             } else if (error.code === 'auth/too-many-requests') {
                 description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
+            } else if (error.code === 'auth/email-already-in-use' && !isNewUser) {
+                description = "This email is already registered. Please enter your password to log in.";
             }
+            
             toast({
                 variant: "destructive",
                 title: isNewUser ? "Registration Failed" : "Login Failed",
@@ -149,6 +155,7 @@ function PasswordPageContent() {
                                 disabled={isSubmitting}
                             >
                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
                             </Button>
                         </div>
                         {isNewUser && (
@@ -180,3 +187,5 @@ export default function StudentPasswordPage() {
       </Suspense>
     );
   }
+
+    
