@@ -29,6 +29,36 @@
       "description": "A bright yellow bowl of tangy Lemon Rice, garnished with peanuts and fresh curry leaves.",
       "imageUrl": "https://www.flavourstreat.com/wp-content/uploads/2020/12/turmeric-lemon-rice-recipe-02.jpg",
       "imageHint": "lemon rice"
+    },
+    {
+      "id": "poori-masala",
+      "description": "Golden-brown puffed pooris served with a side of spiced potato masala.",
+      "imageUrl": "https://www.vegrecipesofindia.com/wp-content/uploads/2021/08/poori-masala-recipe-1.jpg",
+      "imageHint": "poori masala"
+    },
+    {
+      "id": "chapathi-kurma",
+      "description": "Soft chapathis served with a creamy vegetable kurma in a traditional bowl.",
+      "imageUrl": "https://www.subbuskitchen.com/wp-content/uploads/2012/12/Veg-Kurma-for-Chapathi_1.jpg",
+      "imageHint": "chapathi kurma"
+    },
+    {
+      "id": "sambar-rice",
+      "description": "A comforting bowl of sambar rice mixed with vegetables, topped with ghee and coriander.",
+      "imageUrl": "https://www.vegrecipesofindia.com/wp-content/uploads/2013/05/sambar-sadamsouth-indian-sambar-rice-recipe.jpg",
+      "imageHint": "sambar rice"
+    },
+    {
+      "id": "onion-pakoda",
+      "description": "Crispy, golden-brown onion pakodas piled up on a plate, ready to be eaten.",
+      "imageUrl": "https://www.vegrecipesofindia.com/wp-content/uploads/2021/08/onion-pakoda-recipe-1.jpg",
+      "imageHint": "onion pakoda"
+    },
+    {
+      "id": "ghee-roast",
+      "description": "A crispy, paper-thin ghee roast dosa, rolled into a perfect cone shape.",
+      "imageUrl": "https://www.vegrecipesofindia.com/wp-content/uploads/2021/06/ghee-roast-dosa-1.jpg",
+      "imageHint": "ghee roast"
     }
   ]
 }
