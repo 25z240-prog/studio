@@ -4,7 +4,7 @@
 import { useState, useEffect, Suspense, useMemo } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
-import { Plus, LogOut, UserCircle, KeyRound } from "lucide-react";
+import { Plus, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
@@ -16,8 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth, useFirebase, useCollection, useMemoFirebase } from "@/firebase";
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { collection, doc, increment } from "firebase/firestore";
-import { useToast } from "@/hooks/use-toast";
-import { sendPasswordResetEmail } from "firebase/auth";
 import { seedDatabase } from "@/lib/seed";
 
 
@@ -31,7 +29,6 @@ function VotePageContent() {
   
   const { firestore, user, isUserLoading } = useFirebase();
   const auth = useAuth();
-  const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
@@ -39,7 +36,7 @@ function VotePageContent() {
     firestore && !isUserLoading && user ? collection(firestore, 'menuItems') : null, 
     [firestore, isUserLoading, user]
   );
-  const { data: menuItems, isLoading: isLoadingMenu, error: menuItemsError } = useCollection<MenuItem>(menuItemsQuery);
+  const { data: menuItems, isLoading: isLoadingMenu } = useCollection<MenuItem>(menuItemsQuery);
   
   const votesQuery = useMemoFirebase(() =>
     firestore && user ? collection(firestore, `users/${user.uid}/votes`) : null,
@@ -104,31 +101,6 @@ function VotePageContent() {
   const handleLogout = () => {
     auth?.signOut();
     router.push('/login');
-  };
-
-  const handleChangePassword = () => {
-    if (!auth || !user?.email) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Could not send password reset email. User not found.",
-      });
-      return;
-    }
-    sendPasswordResetEmail(auth, user.email)
-      .then(() => {
-        toast({
-          title: "Password Reset Email Sent",
-          description: `An email has been sent to ${user.email} with instructions to reset your password.`,
-        });
-      })
-      .catch((error) => {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to send password reset email.",
-        });
-      });
   };
   
   const renderCategory = (day: DayOfWeek, category: MenuCategory) => {
@@ -208,12 +180,6 @@ function VotePageContent() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                 {role === 'student' && (
-                  <DropdownMenuItem onClick={handleChangePassword}>
-                    <KeyRound className="mr-2 h-4 w-4" />
-                    <span>Change Password</span>
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>

@@ -14,7 +14,6 @@ import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blockin
 import { useAuth, useFirestore } from "@/firebase/provider";
 import { doc } from "firebase/firestore";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
-import { Eye, EyeOff } from "lucide-react";
 import { AuthErrorCodes, UserCredential } from "firebase/auth";
 
 export default function StudentLoginPage() {
@@ -24,8 +23,7 @@ export default function StudentLoginPage() {
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const password = "password"; // Hardcoded password
 
   const handleLoginSuccess = (userCredential: UserCredential) => {
     if (!firestore || !userCredential.user) return;
@@ -33,7 +31,6 @@ export default function StudentLoginPage() {
     router.push('/vote?role=student');
 
     // Check if a user document already exists, if not create one.
-    // This is useful for users created directly via Auth console.
     const userDocRef = doc(firestore, "users", userCredential.user.uid);
     const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
     setDocumentNonBlocking(userDocRef, {
@@ -81,25 +78,16 @@ export default function StudentLoginPage() {
       .catch(error => {
         // If user does not exist, try to create an account
         if (error.code === AuthErrorCodes.USER_NOT_FOUND) {
-            // Only allow account creation with the default password
-            if (password === 'password') {
-                const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
-                initiateEmailSignUp(auth, email, password, studentName)
-                    .then(handleLoginSuccess)
-                    .catch(signUpError => {
-                        toast({
-                            variant: "destructive",
-                            title: "Registration Failed",
-                            description: signUpError.message || "Could not create your account. Please try again.",
-                        });
+            const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
+            initiateEmailSignUp(auth, email, password, studentName)
+                .then(handleLoginSuccess)
+                .catch(signUpError => {
+                    toast({
+                        variant: "destructive",
+                        title: "Registration Failed",
+                        description: signUpError.message || "Could not create your account. Please try again.",
                     });
-            } else {
-                 toast({
-                    variant: "destructive",
-                    title: "Login Failed",
-                    description: "Account not found. Please use the default password 'password' for your first login.",
                 });
-            }
         } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             toast({
                 variant: "destructive",
@@ -129,27 +117,13 @@ export default function StudentLoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-headline">Student Login</CardTitle>
-          <CardDescription>Enter your PSG iTech email. Use 'password' for your first login.</CardDescription>
+          <CardDescription>Enter your PSG iTech email to continue.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
                <Input id="email" type="email" placeholder="yourname@psgitech.ac.in" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="grid gap-2 relative">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Enter your password" />
-               <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-[2.2rem] h-7 w-7"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
-              </Button>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
