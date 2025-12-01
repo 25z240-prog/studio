@@ -154,10 +154,10 @@ function VotePageContent() {
       <main className="flex-1">
         <section className="container mx-auto px-4 py-8 md:py-12">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-headline">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-headline text-foreground">
               Weekly Menu Proposals
             </h2>
-            <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
+            <p className="mx-auto max-w-[700px] text-foreground/80 md:text-xl mt-4">
               Vote for your favorite dishes to see them on next week&apos;s menu! The most popular items win.
             </p>
           </div>
@@ -182,7 +182,7 @@ function VotePageContent() {
                 <div className="mb-4 rounded-full bg-muted p-4">
                     <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={48} height={48} alt="PSG iTech Logo" />
                 </div>
-                <h3 className="text-2xl font-bold tracking-tight font-headline">
+                <h3 className="text-2xl font-bold tracking-tight font-headline text-foreground">
                     No menu items proposed yet.
                 </h3>
                 <p className="text-muted-foreground mt-2">
