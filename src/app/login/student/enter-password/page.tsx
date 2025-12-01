@@ -13,11 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase/provider";
 import { signInWithEmailAndPassword, UserCredential, AuthErrorCodes } from "firebase/auth";
 import { Eye, EyeOff } from "lucide-react";
+import { doc, setDoc } from "firebase/firestore";
 
 function EnterPasswordPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const auth = useAuth();
+    const firestore = useFirestore();
     const { toast } = useToast();
 
     const [password, setPassword] = useState("");
