@@ -29,9 +29,9 @@ export default function StudentLoginPage() {
 
   const handleLoginSuccess = (userCredential: UserCredential) => {
     if (!firestore || !userCredential.user) return;
-
-    router.push('/vote?role=student');
     
+    router.push('/vote?role=student');
+
     // Check if a user document already exists, if not create one.
     // This is useful for users created directly via Auth console.
     const userDocRef = doc(firestore, "users", userCredential.user.uid);
@@ -79,11 +79,12 @@ export default function StudentLoginPage() {
     initiateEmailSignIn(auth, email, password)
       .then(handleLoginSuccess)
       .catch(error => {
-        // If user does not exist, try to create an account with default password
+        // If user does not exist, try to create an account
         if (error.code === AuthErrorCodes.USER_NOT_FOUND) {
+            // Only allow account creation with the default password
             if (password === 'password') {
                 const studentName = email.split('@')[0].replace(/[\._]/g, ' ');
-                initiateEmailSignUp(auth, email, 'password', studentName)
+                initiateEmailSignUp(auth, email, password, studentName)
                     .then(handleLoginSuccess)
                     .catch(signUpError => {
                         toast({
@@ -95,15 +96,15 @@ export default function StudentLoginPage() {
             } else {
                  toast({
                     variant: "destructive",
-                    title: "First Time Login Failed",
-                    description: "Your account does not exist. Please use the default password 'password' to create it.",
+                    title: "Login Failed",
+                    description: "Account not found. Please use the default password 'password' for your first login.",
                 });
             }
         } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             toast({
                 variant: "destructive",
                 title: "Login Failed",
-                description: "Incorrect password. If this is your first login, please use 'password'.",
+                description: "Incorrect password. If you haven't changed it, the default password is 'password'.",
             });
         }
         else {
