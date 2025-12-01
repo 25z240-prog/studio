@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -7,12 +8,35 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
+import { initiateEmailSignIn } from "@/firebase";
+import { useAuth } from "@/firebase/provider";
 
 export default function ManagementLoginPage() {
   const router = useRouter();
+  const auth = useAuth();
+  const { toast } = useToast();
+  const [email, setEmail] = useState("management@psgitech.edu");
+  const [password, setPassword] = useState("password");
+
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!auth) return;
+    try {
+        initiateEmailSignIn(auth, email, password);
+        toast({
+            title: "Logging in...",
+            description: "Please wait while we log you in as management.",
+        });
+        // The onAuthStateChanged listener in FirebaseProvider will handle the redirect
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: error.message || "An unexpected error occurred.",
+        });
+    }
     router.push('/vote?role=management');
   };
 
@@ -33,11 +57,11 @@ export default function ManagementLoginPage() {
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" required />
+              <Input id="email" type="email" placeholder="m@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required />
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">

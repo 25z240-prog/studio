@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
 import { Plus, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
 import AddMenuItemDialog from "@/components/add-menu-item-dialog";
-import { initialMenuItems } from "@/lib/data";
 import { type MenuItem, type MenuCategory, type DayOfWeek } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth, useFirebase, useCollection, useMemoFirebase } from "@/firebase";
+import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { collection, doc, increment } from "firebase/firestore";
 
-
-const LOCAL_STORAGE_KEY = 'hostelMenuItems';
 const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const categories: MenuCategory[] = ['breakfast', 'lunch', 'snack', 'dinner'];
 
@@ -23,102 +23,74 @@ function VotePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const role = searchParams.get('role');
-
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [votedItems, setVotedItems] = useState<Set<string>>(new Set());
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    try {
-      const storedItems = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (storedItems) {
-        setMenuItems(JSON.parse(storedItems));
-      } else {
-        setMenuItems(initialMenuItems);
-      }
-    } catch (error) {
-      console.error("Could not load menu items from local storage", error);
-      setMenuItems(initialMenuItems);
-    } finally {
-        setIsLoaded(true);
-    }
-    
-    const storedVotedItems = localStorage.getItem('votedItems');
-    if(storedVotedItems) {
-        setVotedItems(new Set(JSON.parse(storedVotedItems)));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isLoaded) {
-        try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(menuItems));
-        } catch (error) {
-            console.error("Could not save menu items to local storage", error);
-        }
-    }
-  }, [menuItems, isLoaded]);
   
-  useEffect(() => {
-    if(isLoaded) {
-      try {
-        localStorage.setItem('votedItems', JSON.stringify(Array.from(votedItems)));
-      } catch (error) {
-        console.error("Could not save voted items to local storage", error);
-      }
-    }
-  }, [votedItems, isLoaded]);
+  const { firestore, user, isUserLoading } = useFirebase();
+  const auth = useAuth();
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const menuItemsQuery = useMemoFirebase(() => 
+    firestore ? collection(firestore, 'menuItems') : null, 
+    [firestore]
+  );
+  const { data: menuItems, isLoading: isLoadingMenu } = useCollection<MenuItem>(menuItemsQuery);
+  
+  const votesQuery = useMemoFirebase(() =>
+    firestore && user ? collection(firestore, `users/${user.uid}/votes`) : null,
+    [firestore, user]
+  );
+  const { data: userVotes, isLoading: isLoadingVotes } = useCollection(votesQuery);
+
+  const votedItems = useMemo(() => new Set(userVotes?.map(v => v.menuItemId) || []), [userVotes]);
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isUserLoading, router]);
 
   const handleVote = (itemId: string) => {
-    if (votedItems.has(itemId) || role === 'management') return;
+    if (!firestore || !user || votedItems.has(itemId) || role === 'management') return;
+    
+    const menuItemRef = doc(firestore, "menuItems", itemId);
+    const voteRef = doc(firestore, `users/${user.uid}/votes`, itemId);
 
-    setMenuItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === itemId ? { ...item, votes: item.votes + 1 } : item
-      )
-    );
-    setVotedItems(prev => new Set(prev).add(itemId));
+    // Optimistically update UI while firebase syncs in the background
+    setDocumentNonBlocking(menuItemRef, { votes: increment(1) }, { merge: true });
+    setDocumentNonBlocking(voteRef, { menuItemId: itemId, votedAt: new Date() }, {merge: true});
   };
 
   const handleRevokeVote = (itemId: string) => {
-    if (!votedItems.has(itemId) || role === 'management') return;
+    if (!firestore || !user || !votedItems.has(itemId) || role === 'management') return;
+    
+    const menuItemRef = doc(firestore, "menuItems", itemId);
+    const voteRef = doc(firestore, `users/${user.uid}/votes`, itemId);
 
-    setMenuItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === itemId ? { ...item, votes: Math.max(0, item.votes - 1) } : item
-      )
-    );
-    setVotedItems(prev => {
-        const newVoted = new Set(prev);
-        newVoted.delete(itemId);
-        return newVoted;
-    });
+    setDocumentNonBlocking(menuItemRef, { votes: increment(-1) }, { merge: true });
+    deleteDocumentNonBlocking(voteRef);
   };
 
   const handleAddItem = (newItemData: Omit<MenuItem, "id" | "votes">) => {
-    const fullNewItem: MenuItem = {
-      ...newItemData,
-      id: new Date().toISOString(),
-      votes: 0,
-    };
-    setMenuItems((currentItems) => [fullNewItem, ...currentItems]);
+    if (!firestore) return;
+    const menuItemsCollection = collection(firestore, 'menuItems');
+    addDocumentNonBlocking(menuItemsCollection, { ...newItemData, votes: 0 });
   };
 
   const handleDeleteItem = (itemId: string) => {
-    setMenuItems((currentItems) =>
-      currentItems.filter((item) => item.id !== itemId)
-    );
+    if (!firestore) return;
+    const menuItemRef = doc(firestore, "menuItems", itemId);
+    deleteDocumentNonBlocking(menuItemRef);
   };
   
-  const sortedMenuItems = [...menuItems].sort((a, b) => b.votes - a.votes);
+  const sortedMenuItems = useMemo(() => 
+    [...(menuItems || [])].sort((a, b) => b.votes - a.votes),
+    [menuItems]
+  );
 
   const showProposeButton = role === 'management';
 
   const handleLogout = () => {
-    // Voted items are cleared for the next user, but menu items persist.
-    localStorage.removeItem('votedItems');
+    auth?.signOut();
     router.push('/login');
   };
   
@@ -156,7 +128,7 @@ function VotePageContent() {
     );
   };
 
-  if (!isLoaded) {
+  if (isUserLoading || isLoadingMenu || isLoadingVotes) {
     return <div className="flex min-h-screen w-full flex-col items-center justify-center"><p>Loading menu...</p></div>;
   }
 
@@ -194,7 +166,7 @@ function VotePageContent() {
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">Logged in as</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {role === 'management' ? 'Management' : 'Student'}
+                      {user?.email || (role === 'management' ? 'Management' : 'Student')}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -219,7 +191,7 @@ function VotePageContent() {
             </p>
           </div>
 
-          {menuItems.length > 0 ? (
+          {(menuItems?.length || 0) > 0 ? (
              <Tabs defaultValue="monday" className="w-full">
                 <TabsList className="grid w-full grid-cols-7">
                     {daysOfWeek.map(day => (

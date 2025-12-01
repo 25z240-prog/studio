@@ -43,6 +43,10 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
+    
+    function isManagement() {
+      return request.auth.token.email == "management@psgitech.edu";
+    }
 
     /**
      * Returns true if a document exists and the user is the owner.
@@ -66,82 +70,20 @@ service cloud.firestore {
     function userIdIsImmutable() {
       return request.resource.data.id == resource.data.id;
     }
-
-    /**
-     * Validates that the `submitterId` of a new MenuItem matches the creator's auth UID.
-     */
-    function hasCorrectSubmitterOnCreate() {
-      return request.resource.data.submitterId == request.auth.uid;
-    }
-
-    /**
-     * Ensures the `submitterId` of a MenuItem cannot be changed after creation.
-     */
-    function submitterIsImmutable() {
-      return request.resource.data.submitterId == resource.data.submitterId;
-    }
-
-    /**
-     * Validates that a new Vote document has the correct `voterId` (the creator)
-     * and `menuItemId` (matching the path).
-     */
-    function hasCorrectVoteFieldsOnCreate(menuItemId) {
-      return request.resource.data.voterId == request.auth.uid
-          && request.resource.data.menuItemId == menuItemId;
-    }
-
-    /**
-     * Ensures that the core relational fields of a Vote are immutable.
-     */
-    function voteFieldsAreImmutable() {
-      return request.resource.data.voterId == resource.data.voterId
-          && request.resource.data.menuItemId == resource.data.menuItemId;
-    }
-
-
-    /**
-     * @description Rules for the User collection. Each document represents a user's profile.
-     * @path /users/{userId}
-     * @allow A signed-in user (auth.uid='user_abc') can (create) or (update) their own profile at `/users/user_abc`.
-     * @deny An anonymous user cannot read any profile. A signed-in user cannot list all users.
-     * @principle Restricts access to a user's own data tree and enforces relational integrity.
-     */
+    
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId) && hasCorrectUserIdOnCreate(userId);
-      allow update: if isOwner(userId) && userIdIsImmutable();
-      allow delete: if isOwner(userId);
+      allow read, write: if isOwner(userId);
+      
+      match /votes/{voteId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
-    /**
-     * @description Rules for the MenuItem collection. These are publicly viewable food suggestions.
-     * @path /menuItems/{menuItemId}
-     * @allow Anyone, including unauthenticated users, can (get) or (list) menu items. A user can (create) a menu item if they set themselves as the submitter.
-     * @deny A user cannot (update) or (delete) a menu item they did not submit.
-     * @principle Enforces a "Public Read with Owner-Only Writes" pattern using a denormalized `submitterId` field.
-     */
     match /menuItems/{menuItemId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if isSignedIn() && hasCorrectSubmitterOnCreate();
-      allow update: if isExistingOwner(resource.data.submitterId) && submitterIsImmutable();
-      allow delete: if isExistingOwner(resource.data.submitterId);
-
-      /**
-       * @description Rules for the Vote subcollection. Each document is a user's private vote on a menu item.
-       * @path /menuItems/{menuItemId}/votes/{voteId}
-       * @allow A signed-in user (auth.uid='user_abc') can (create) their own vote. They can also (get), (update), or (delete) a vote they previously cast.
-       * @deny A user cannot see another user's vote. Listing all votes for a menu item is disabled for privacy.
-       * @principle Enforces strict document ownership. Prevents data leakage by disabling list operations.
-       */
-      match /votes/{voteId} {
-        allow get: if isOwner(resource.data.voterId);
-        allow list: if false;
-        allow create: if isSignedIn() && hasCorrectVoteFieldsOnCreate(menuItemId);
-        allow update: if isExistingOwner(resource.data.voterId) && voteFieldsAreImmutable();
-        allow delete: if isExistingOwner(resource.data.voterId);
-      }
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create, delete: if isManagement();
+      allow update: if isSignedIn();
     }
   }
 }
