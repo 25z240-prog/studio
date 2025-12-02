@@ -23,10 +23,6 @@
           "description": "URL of the photo of the menu item.",
           "format": "uri"
         },
-        "preparationInstructions": {
-          "type": "string",
-          "description": "Detailed instructions on how to prepare the menu item."
-        },
         "nutritionalFacts": {
           "type": "string",
           "description": "Nutritional information about the menu item."
@@ -49,7 +45,6 @@
         "title",
         "ingredients",
         "photoUrl",
-        "preparationInstructions",
         "nutritionalFacts",
         "isVegan",
         "isVegetarian",

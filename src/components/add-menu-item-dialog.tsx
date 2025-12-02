@@ -46,7 +46,6 @@ const formSchema = z.object({
     required_error: "You need to select a category."
   }),
   ingredients: z.string().min(1, "Please list at least one ingredient."),
-  instructions: z.string().min(10, "Instructions must be at least 10 characters."),
   imageUrl: z.string().url("Please enter a valid image URL."),
   dietaryInfo: z.enum(["veg", "non-veg"], {
     required_error: "You need to select a dietary option."
@@ -73,7 +72,6 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
       title: "",
       description: "",
       ingredients: "",
-      instructions: "",
       imageUrl: "",
       dietaryInfo: "veg",
       calories: "",
@@ -97,10 +95,9 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
           day: values.day as DayOfWeek,
           category: values.category as MenuCategory,
           ingredients: values.ingredients.split(",").map((i) => i.trim()),
-          instructions: values.instructions,
           imageUrl: values.imageUrl,
           imageHint: "custom dish",
-          dietaryInfo: values.dietaryInfo,
+          dietaryInfo: values.dietaryInfo as 'veg' | 'non-veg',
           nutrition: {
             calories: values.calories,
             protein: values.protein,
@@ -218,7 +215,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
+                        </Trigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="breakfast">Breakfast</SelectItem>
@@ -241,19 +238,6 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                   <FormLabel>Ingredients</FormLabel>
                   <FormControl>
                     <Textarea placeholder="List ingredients, separated by commas." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="instructions"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Preparation Instructions</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Step-by-step instructions to prepare the dish." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

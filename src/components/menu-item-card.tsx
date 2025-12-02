@@ -77,18 +77,14 @@ export default function MenuItemCard({ item, rank, onVote, onRevokeVote, isVoted
         <CardDescription>{item.description}</CardDescription>
         
         <Tabs defaultValue="ingredients" className="w-full mt-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
-            <TabsTrigger value="instructions">Method</TabsTrigger>
             <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
           </TabsList>
           <TabsContent value="ingredients" className="text-sm mt-4 min-h-[100px]">
             <ul className="list-disc pl-5 space-y-1">
               {item.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
             </ul>
-          </TabsContent>
-          <TabsContent value="instructions" className="text-sm mt-4 min-h-[100px]">
-             <p className="whitespace-pre-wrap">{item.instructions}</p>
           </TabsContent>
           <TabsContent value="nutrition" className="text-sm mt-4 min-h-[100px]">
              <div className="grid grid-cols-2 gap-2">
