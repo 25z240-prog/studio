@@ -23,37 +23,5 @@ service cloud.firestore {
       allow create: if isOwner(userId); // User can create their own document
       allow write: if isOwner(userId); // User can update their own document
     }
-    
-    match /menuItems/{menuItemId} {
-      allow list, get: if isSignedIn();
-      // Management can create items 
-      allow create: if isManagement();
-      allow delete: if isManagement();
-      
-      allow update: if (isManagement()) ||
-                      (isStudent() &&
-                       // Ensure only the 'votes' field is being changed
-                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']) &&
-                       (
-                         // Allow incrementing votes by 1
-                         request.resource.data.votes == resource.data.votes + 1 ||
-                         // Allow decrementing votes by 1 only if current votes > 0
-                         (request.resource.data.votes == resource.data.votes - 1 && resource.data.votes > 0)
-                       )
-                      );
-
-      match /votes/{voteId} {
-         // Students can only manage their own votes
-         allow create, update, delete: if isStudent() && request.resource.data.voterId == request.auth.uid;
-         // A user can only read their own vote document
-         allow read: if isSignedIn() && isOwner(request.resource.data.voterId);
-      }
-    }
-    
-     // This collection stores which menu items a user has voted for
-     match /users/{userId}/votes/{voteId} {
-      // A user can only read and write to their own votes subcollection
-      allow read, write: if isOwner(userId);
-    }
   }
 }

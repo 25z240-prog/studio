@@ -1,4 +1,5 @@
 
+
 export type DietaryInfo = 'veg' | 'non-veg';
 
 export type MenuCategory = 'breakfast' | 'lunch' | 'snack' | 'dinner';
