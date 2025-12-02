@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "MenuItem": {
@@ -22,23 +23,13 @@
           "type": "string",
           "description": "URL of the photo of the menu item.",
           "format": "uri"
-        },
-        "isVegan": {
-          "type": "boolean",
-          "description": "Indicates whether the menu item is vegan."
-        },
-        "isVegetarian": {
-          "type": "boolean",
-          "description": "Indicates whether the menu item is vegetarian."
         }
       },
       "required": [
         "id",
         "title",
         "ingredients",
-        "photoUrl",
-        "isVegan",
-        "isVegetarian"
+        "photoUrl"
       ]
     },
     "Vote": {
