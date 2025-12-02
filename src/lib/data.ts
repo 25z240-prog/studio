@@ -87,14 +87,5 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: 'https://www.yummytummyaarthi.com/wp-content/uploads/2022/09/egg-puffs-1.jpeg',
     imageHint: 'egg puffs',
     dietaryInfo: 'non-veg',
-  },
-  {
-    title: 'Chapathi with Kurma',
-    category: 'dinner',
-    day: 'monday',
-    ingredients: ['Whole Wheat Flour', 'Mixed Vegetables', 'Coconut', 'Onion', 'Tomato', 'Ginger-Garlic Paste', 'Spices'],
-    imageUrl: getImage('chapathi-kurma'),
-    imageHint: 'chapathi kurma',
-    dietaryInfo: 'veg',
   }
 ];
