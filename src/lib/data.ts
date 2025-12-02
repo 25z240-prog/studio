@@ -15,7 +15,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('ven-pongal'),
     imageHint: 'pongal dish',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
   {
     title: 'Poori Masala',
@@ -25,7 +24,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('poori-masala'),
     imageHint: 'poori masala',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
   {
     title: 'Ghee Roast Dosa',
@@ -35,7 +33,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('ghee-roast'),
     imageHint: 'ghee roast',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
   {
     title: 'Bisi Bele Bath',
@@ -45,7 +42,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('bisi-bele-bath'),
     imageHint: 'rice dish',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
   {
     title: 'Lemon Rice (Chitranna)',
@@ -55,7 +51,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('lemon-rice'),
     imageHint: 'lemon rice',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
   {
     title: 'Sambar Rice',
@@ -65,7 +60,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('sambar-rice'),
     imageHint: 'sambar rice',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
   {
     title: 'Onion Pakoda',
@@ -75,7 +69,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('onion-pakoda'),
     imageHint: 'onion pakoda',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
   {
     title: 'Masala Vada',
@@ -85,7 +78,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('masala-vada'),
     imageHint: 'masala vada',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
   {
     title: 'Egg Puffs',
@@ -95,7 +87,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: 'https://www.yummytummyaarthi.com/wp-content/uploads/2022/09/egg-puffs-1.jpeg',
     imageHint: 'egg puffs',
     dietaryInfo: 'non-veg',
-    submitterId: 'management',
   },
   {
     title: 'Chapathi with Kurma',
@@ -105,7 +96,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('chapathi-kurma'),
     imageHint: 'chapathi kurma',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
   {
     title: 'Chapathi with Kurma',
@@ -115,7 +105,6 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('chapathi-kurma'),
     imageHint: 'chapathi kurma',
     dietaryInfo: 'veg',
-    submitterId: 'management',
   },
    {
     title: 'Paratha',
@@ -125,7 +114,5 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: "https://www.indianhealthyrecipes.com/wp-content/uploads/2022/02/paratha-recipe.jpg",
     imageHint: 'paratha bread',
     dietaryInfo: 'veg',
-    submitterId: 'management'
   }
 ];
-

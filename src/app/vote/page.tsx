@@ -72,7 +72,7 @@ function VotePageContent() {
   const handleAddItem = (newItemData: Omit<MenuItem, "id" | "votes">) => {
     if (!firestore || !user) return;
     const menuItemsCollection = collection(firestore, 'menuItems');
-    addDocumentNonBlocking(menuItemsCollection, { ...newItemData, votes: 0, submitterId: user.uid });
+    addDocumentNonBlocking(menuItemsCollection, { ...newItemData, votes: 0 });
   };
 
   const handleDeleteItem = (itemId: string) => {
