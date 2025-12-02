@@ -88,9 +88,16 @@ const nextConfig: NextConfig = {
         hostname: "www.yummytummyaarthi.com",
         port: "",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.indianhealthyrecipes.com",
+        port: "",
+        pathname: "/**",
       }
     ],
   },
 };
 
 export default nextConfig;
+
