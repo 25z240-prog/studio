@@ -54,6 +54,15 @@ function VotePageContent() {
     }, {} as { [key in DayOfWeek]?: MenuItem[] });
   }, [menuItems]);
 
+  const defaultDay = useMemo(() => {
+    const todayIndex = new Date().getDay(); // Sunday: 0, Monday: 1, etc.
+    // Adjust index because our array starts with Monday, but getDay() starts with Sunday.
+    // If today is Sunday (0), we want the last day of our array (index 6).
+    // If today is Monday (1), we want the first day (index 0).
+    const adjustedIndex = todayIndex === 0 ? 6 : todayIndex - 1;
+    return daysOfWeek[adjustedIndex];
+  }, []);
+
 
   if (isUserLoading || isLoadingMenuItems) {
     return <div className="flex min-h-screen w-full flex-col items-center justify-center"><p>Loading...</p></div>;
@@ -121,8 +130,8 @@ function VotePageContent() {
             </p>
           </div>
 
-          {menuItems.length > 0 ? (
-            <Accordion type="single" collapsible className="w-full" defaultValue={`${daysOfWeek[new Date().getDay()]}-menu`}>
+          {(menuItems || []).length > 0 ? (
+            <Accordion type="single" collapsible className="w-full" defaultValue={`${defaultDay}-menu`}>
               {daysOfWeek.map(day => (
                 <AccordionItem value={`${day}-menu`} key={day}>
                   <AccordionTrigger className="text-2xl font-headline capitalize">
