@@ -103,7 +103,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
             protein: values.protein,
             carbs: values.carbs,
             fat: values.fat,
-          },
+          }
         };
 
         onAddItem(newItem);
