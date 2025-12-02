@@ -92,6 +92,18 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     submitterId: 'management',
   },
   {
+    title: 'Egg Puffs',
+    description: 'A savory puff pastry snack with a spicy egg masala filling. A flaky and delicious treat, perfect for evenings.',
+    category: 'snack',
+    day: 'wednesday',
+    ingredients: ['Puff Pastry Sheets', 'Boiled Eggs', 'Onion', 'Tomato', 'Ginger-Garlic Paste', 'Spices'],
+    imageUrl: 'https://www.yummytummyaarthi.com/wp-content/uploads/2022/09/egg-puffs-1.jpeg',
+    imageHint: 'egg puffs',
+    dietaryInfo: 'non-veg',
+    nutrition: { calories: '350 kcal', protein: '12g', carbs: '25g', fat: '20g' },
+    submitterId: 'management',
+  },
+  {
     title: 'Chapathi with Kurma',
     description: 'Soft, unleavened flatbreads (chapathi) served with a rich and creamy mixed vegetable curry (kurma) made with a coconut-based gravy.',
     category: 'dinner',
