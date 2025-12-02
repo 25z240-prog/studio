@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -65,7 +66,7 @@ type AddMenuItemDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-export default function AddMenuItemDialog({ children, onAddItem, open, onOpenChange }: AddMenuItemDialogProps) {
+export function AddMenuItemDialog({ children, onAddItem, open, onOpenChange }: AddMenuItemDialogProps) {
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -201,7 +202,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
+                        </Trigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="breakfast">Breakfast</SelectItem>
@@ -329,4 +330,27 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
   );
 }
 
-    
+// Client wrapper to prevent hydration errors
+type AddMenuItemDialogClientProps = {
+    onAddItem: (item: Omit<MenuItem, "id" | "votes">) => void;
+    children: React.ReactNode;
+}
+
+export default function AddMenuItemDialogClient({ children, onAddItem }: AddMenuItemDialogClientProps) {
+    const [open, setOpen] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return <div className="contents">{children}</div>;
+    }
+
+    return (
+        <AddMenuItemDialog onAddItem={onAddItem} open={open} onOpenChange={setOpen}>
+            {children}
+        </AddMenuItemDialog>
+    );
+}

@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { Plus, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MenuItemCard from "@/components/menu-item-card";
-import AddMenuItemDialog from "@/components/add-menu-item-dialog";
+import AddMenuItemDialogClient from "@/components/add-menu-item-dialog";
 import { type MenuItem, type MenuCategory, type DayOfWeek } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,8 +28,6 @@ function VotePageContent() {
   
   const { firestore, user, isUserLoading } = useFirebase();
   const auth = useAuth();
-
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const menuItemsQuery = useMemoFirebase(() => 
     firestore && !isUserLoading && user ? collection(firestore, 'menuItems') : null, 
@@ -146,16 +144,14 @@ function VotePageContent() {
           </Link>
           <div className="flex items-center gap-4">
             {showProposeButton && (
-              <AddMenuItemDialog
+              <AddMenuItemDialogClient
                 onAddItem={handleAddItem}
-                open={isDialogOpen}
-                onOpenChange={setIsDialogOpen}
               >
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
                   Propose an Item
                 </Button>
-              </AddMenuItemDialog>
+              </AddMenuItemDialogClient>
             )}
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -250,5 +246,3 @@ export default function VotePage() {
     </Suspense>
   );
 }
-
-    
