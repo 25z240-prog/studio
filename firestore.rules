@@ -26,10 +26,11 @@ service cloud.firestore {
     
     match /menuItems/{menuItemId} {
       allow list, get: if isSignedIn();
-      allow create: if isManagement() && request.resource.data.submitterId == request.auth.uid;
+      // Management can create items without needing a submitterId
+      allow create: if isManagement();
       allow delete: if isManagement();
       
-      allow update: if (isManagement() && request.resource.data.submitterId == request.auth.uid) ||
+      allow update: if (isManagement()) ||
                       (isStudent() &&
                        // Ensure only the 'votes' field is being changed
                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']) &&

@@ -11,14 +11,12 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithEmailAndPassword, UserCredential } from "firebase/auth";
-import { useAuth, useFirestore } from "@/firebase/provider";
+import { useAuth } from "@/firebase/provider";
 import { Eye, EyeOff } from "lucide-react";
-import { doc, setDoc } from "firebase/firestore";
 
 export default function ManagementLoginPage() {
   const router = useRouter();
   const auth = useAuth();
-  const firestore = useFirestore();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,19 +39,6 @@ export default function ManagementLoginPage() {
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      
-      // Ensure a user document exists for management.
-      // This is a good practice to ensure consistency.
-      if (firestore) {
-        const user = userCredential.user;
-        const userDocRef = doc(firestore, "users", user.uid);
-        await setDoc(userDocRef, {
-            id: user.uid,
-            name: "Management",
-            email: user.email
-        }, { merge: true });
-      }
-
       handleLoginSuccess(userCredential);
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
