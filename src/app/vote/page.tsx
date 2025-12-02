@@ -185,7 +185,7 @@ function VotePageContent() {
               Weekly Menu Proposals
             </h2>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
-              Vote for your favorite dishes to see them on next week&apos;s menu! The most popular items win.
+              Vote for your favorite dishes to see them on next week's menu! The most popular items win.
             </p>
           </div>
 
