@@ -175,7 +175,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a day" />
-                        </Trigger>
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="monday">Monday</SelectItem>
