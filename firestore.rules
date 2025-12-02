@@ -20,14 +20,15 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow create: if isOwner(userId); // User can create their own document
-      allow write: if isOwner(userId); // User can update their own document
+      allow create: if isOwner(userId);
+      allow write: if isOwner(userId);
     }
 
     match /menuItems/{menuItemId} {
       allow read: if isSignedIn();
       allow create: if isManagement();
-      allow update, delete: if isManagement();
+      allow delete: if isManagement();
+      allow update: if isManagement() || (isStudent() && request.resource.data.votes == request.resource.data.votes + 1);
     }
   }
 }
