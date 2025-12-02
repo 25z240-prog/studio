@@ -53,9 +53,10 @@ const formSchema = z.object({
   }),
   calories: z.string().min(1, "Required"),
   protein: z.string().min(1, "Required"),
-  carbs: z  .string().min(1, "Required"),
+  carbs: z.string().min(1, "Required"),
   fat: z.string().min(1, "Required"),
 });
+
 
 type AddMenuItemDialogProps = {
   children: React.ReactNode;
