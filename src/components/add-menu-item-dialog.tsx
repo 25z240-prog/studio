@@ -344,7 +344,9 @@ export default function AddMenuItemDialogClient({ children, onAddItem }: AddMenu
     }, []);
 
     if (!isMounted) {
-        return <div className="contents">{children}</div>;
+        // Return a placeholder or the trigger itself to prevent layout shift
+        // and to ensure the trigger is always rendered on the server and client.
+        return <div className="contents" onClick={() => setOpen(true)}>{children}</div>;
     }
 
     return (
