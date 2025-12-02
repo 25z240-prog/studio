@@ -202,7 +202,7 @@ export function AddMenuItemDialog({ children, onAddItem, open, onOpenChange }: A
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a category" />
-                        </Trigger>
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="breakfast">Breakfast</SelectItem>
@@ -356,3 +356,5 @@ export default function AddMenuItemDialogClient({ children, onAddItem }: AddMenu
         </AddMenuItemDialog>
     );
 }
+
+    
