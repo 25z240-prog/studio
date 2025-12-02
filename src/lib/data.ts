@@ -96,14 +96,5 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('chapathi-kurma'),
     imageHint: 'chapathi kurma',
     dietaryInfo: 'veg',
-  },
-  {
-    title: 'Chapathi with Kurma',
-    category: 'dinner',
-    day: 'wednesday',
-    ingredients: ['Whole Wheat Flour', 'Mixed Vegetables', 'Coconut', 'Onion', 'Tomato', 'Ginger-Garlic Paste', 'Spices'],
-    imageUrl: getImage('chapathi-kurma'),
-    imageHint: 'chapathi kurma',
-    dietaryInfo: 'veg',
   }
 ];
