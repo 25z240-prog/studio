@@ -105,14 +105,5 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     imageUrl: getImage('chapathi-kurma'),
     imageHint: 'chapathi kurma',
     dietaryInfo: 'veg',
-  },
-   {
-    title: 'Paratha',
-    category: 'dinner',
-    day: 'saturday',
-    ingredients: ['Whole Wheat Flour', 'Ghee', 'Salt', 'Water'],
-    imageUrl: "https://www.indianhealthyrecipes.com/wp-content/uploads/2022/02/paratha-recipe.jpg",
-    imageHint: 'paratha bread',
-    dietaryInfo: 'veg',
   }
 ];
