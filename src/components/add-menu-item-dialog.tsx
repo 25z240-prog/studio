@@ -1,3 +1,4 @@
+
 "use client";
 
 import { z } from "zod";
@@ -82,45 +83,29 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-        const url = new URL(values.imageUrl);
-        // This is a placeholder for a server action that would update next.config.js
-        // Since we can't directly modify server files from the client,
-        // in a real app this would be an API call.
-        console.log(`Ensuring hostname is allowed: ${url.hostname}`);
-
-        const newItem = {
-          title: values.title,
-          description: values.description,
-          day: values.day as DayOfWeek,
-          category: values.category as MenuCategory,
-          ingredients: values.ingredients.split(",").map((i) => i.trim()),
-          imageUrl: values.imageUrl,
-          imageHint: "custom dish",
-          dietaryInfo: values.dietaryInfo as 'veg' | 'non-veg',
-          nutrition: {
+    const newItem = {
+        title: values.title,
+        description: values.description,
+        day: values.day as DayOfWeek,
+        category: values.category as MenuCategory,
+        ingredients: values.ingredients.split(",").map((i) => i.trim()),
+        imageUrl: values.imageUrl,
+        imageHint: "custom dish",
+        dietaryInfo: values.dietaryInfo as 'veg' | 'non-veg',
+        nutrition: {
             calories: values.calories,
             protein: values.protein,
             carbs: values.carbs,
             fat: values.fat,
-          }
-        };
-
-        onAddItem(newItem);
-        toast({
-          title: "Success!",
-          description: "Your menu item has been proposed.",
-        });
-        form.reset();
-        onOpenChange(false);
-    } catch(e) {
-        console.error("Error submitting new item:", e);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not add the new item. Please check the image URL and try again.",
-        });
-    }
+        }
+    };
+    onAddItem(newItem);
+    toast({
+        title: "Success!",
+        description: "Your menu item has been proposed.",
+    });
+    form.reset();
+    onOpenChange(false);
   }
 
   return (
@@ -189,7 +174,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a day" />
-                        </SelectTrigger>
+                        </Trigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="monday">Monday</SelectItem>
