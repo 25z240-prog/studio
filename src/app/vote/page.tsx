@@ -56,9 +56,6 @@ function VotePageContent() {
 
   const defaultDay = useMemo(() => {
     const todayIndex = new Date().getDay(); // Sunday: 0, Monday: 1, etc.
-    // Adjust index because our array starts with Monday, but getDay() starts with Sunday.
-    // If today is Sunday (0), we want the last day of our array (index 6).
-    // If today is Monday (1), we want the first day (index 0).
     const adjustedIndex = todayIndex === 0 ? 6 : todayIndex - 1;
     return daysOfWeek[adjustedIndex];
   }, []);
@@ -86,9 +83,9 @@ function VotePageContent() {
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-card/50 backdrop-blur-lg">
         <div className="container flex h-16 items-center justify-between">
-          <Link href="/login" className="flex items-center gap-3">
+          <Link href="/login" className="flex items-center gap-3 flex-shrink-1 min-w-0">
              <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={32} height={32} alt="PSG iTech Logo" />
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold font-headline text-foreground">
+            <h1 className="text-base sm:text-xl md:text-2xl font-bold font-headline text-foreground whitespace-nowrap">
               PSG iTech Hostel Mess
             </h1>
           </Link>
@@ -183,3 +180,5 @@ export default function VotePage() {
     </Suspense>
   );
 }
+
+    
