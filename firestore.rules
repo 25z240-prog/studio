@@ -26,7 +26,7 @@ service cloud.firestore {
     
     match /menuItems/{menuItemId} {
       allow list, get: if isSignedIn();
-      // Management can create items without needing a submitterId
+      // Management can create items 
       allow create: if isManagement();
       allow delete: if isManagement();
       
