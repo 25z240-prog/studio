@@ -82,8 +82,8 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const newItem = {
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    const newItem: Omit<MenuItem, "id" | "votes"> = {
         title: values.title,
         description: values.description,
         day: values.day as DayOfWeek,
