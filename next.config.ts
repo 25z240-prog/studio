@@ -94,10 +94,15 @@ const nextConfig: NextConfig = {
         hostname: "www.indianhealthyrecipes.com",
         port: "",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.google.com",
+        port: "",
+        pathname: "/**",
       }
     ],
   },
 };
 
 export default nextConfig;
-
