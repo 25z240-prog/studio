@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useMemo } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
 import { LogOut, UserCircle } from "lucide-react";
@@ -12,6 +12,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useAuth, useFirebase, useCollection, useMemoFirebase } from "@/firebase";
 import { AddMenuItemDialog } from "@/components/add-menu-item-dialog";
 import { collection } from 'firebase/firestore';
+import { DayOfWeek, MenuCategory, type MenuItem } from "@/lib/types";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MenuItemCard } from "@/components/menu-item-card";
+
+const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const categories: MenuCategory[] = ['breakfast', 'lunch', 'snack', 'dinner'];
 
 function VotePageContent() {
   const searchParams = useSearchParams();
@@ -22,7 +29,7 @@ function VotePageContent() {
   const auth = useAuth();
   
   const menuItemsRef = useMemoFirebase(() => firestore ? collection(firestore, 'menuItems') : null, [firestore]);
-  const { data: menuItems, isLoading: isLoadingMenuItems } = useCollection(menuItemsRef);
+  const { data: menuItems, isLoading: isLoadingMenuItems } = useCollection<MenuItem>(menuItemsRef);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -35,9 +42,36 @@ function VotePageContent() {
     router.push('/login');
   };
 
+  const groupedMenuItems = useMemo(() => {
+    if (!menuItems) return {};
+    return menuItems.reduce((acc, item) => {
+      const day = item.day;
+      if (!acc[day]) {
+        acc[day] = [];
+      }
+      acc[day].push(item);
+      return acc;
+    }, {} as { [key in DayOfWeek]?: MenuItem[] });
+  }, [menuItems]);
+
+
   if (isUserLoading || isLoadingMenuItems) {
     return <div className="flex min-h-screen w-full flex-col items-center justify-center"><p>Loading...</p></div>;
   }
+  
+  const renderCategory = (day: DayOfWeek, category: MenuCategory) => {
+    const items = groupedMenuItems[day]?.filter(item => item.category === category);
+    if (!items || items.length === 0) {
+      return <p className="text-muted-foreground text-center py-8">No items for {category} on {day}.</p>;
+    }
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {items.map(item => (
+          <MenuItemCard key={item.id} item={item} role={role as 'student' | 'management'} />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -78,23 +112,47 @@ function VotePageContent() {
       </header>
       <main className="flex-1">
         <section className="container mx-auto px-4 py-8 md:py-12">
-        <div className="text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl font-headline text-foreground">
-              Mess Dashboard
+              Weekly Mess Menu
             </h2>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
-              Welcome to the PSG iTech Hostel Mess portal.
+              Here's what's cooking this week. {role === 'student' ? 'Vote for your favorite dishes!' : 'Manage the weekly menu.'}
             </p>
           </div>
 
-          <div className="text-center">
-            {role === 'management' && (
-                <p className="text-muted-foreground">You can add new items to the menu using the button in the header.</p>
-            )}
-            {role === 'student' && (
-                <p className="text-muted-foreground">The menu voting system is not yet active. Please check back later.</p>
-            )}
+          {menuItems.length > 0 ? (
+            <Accordion type="single" collapsible className="w-full" defaultValue={`${daysOfWeek[new Date().getDay()]}-menu`}>
+              {daysOfWeek.map(day => (
+                <AccordionItem value={`${day}-menu`} key={day}>
+                  <AccordionTrigger className="text-2xl font-headline capitalize">
+                    {day}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                     <Tabs defaultValue="breakfast" className="w-full">
+                        <TabsList className="grid w-full grid-cols-4">
+                           {categories.map(category => (
+                            <TabsTrigger key={category} value={category} className="capitalize">{category}</TabsTrigger>
+                          ))}
+                        </TabsList>
+                        {categories.map(category => (
+                          <TabsContent key={category} value={category} className="mt-6">
+                            {renderCategory(day, category)}
+                          </TabsContent>
+                        ))}
+                      </Tabs>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
+             <div className="text-center py-12">
+              <p className="text-muted-foreground text-lg">No menu items have been added yet.</p>
+               {role === 'management' && (
+                <p className="text-muted-foreground mt-2">Click "Add Menu Item" in the header to get started.</p>
+              )}
             </div>
+          )}
 
         </section>
       </main>
@@ -116,4 +174,3 @@ export default function VotePage() {
     </Suspense>
   );
 }
-
