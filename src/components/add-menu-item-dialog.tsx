@@ -40,7 +40,6 @@ import { type MenuItem, type MenuCategory, type DayOfWeek } from "@/lib/types";
 
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters."),
-  description: z.string().min(10, "Description must be at least 10 characters."),
   imageUrl: z.string().url("Please enter a valid image URL."),
   day: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"], {
     required_error: "You need to select a day."
@@ -52,10 +51,6 @@ const formSchema = z.object({
   dietaryInfo: z.enum(["veg", "non-veg"], {
     required_error: "You need to select a dietary option."
   }),
-  calories: z.string().min(1, "Required"),
-  protein: z.string().min(1, "Required"),
-  carbs: z.string().min(1, "Required"),
-  fat: z.string().min(1, "Required"),
 });
 
 
@@ -73,33 +68,21 @@ export function AddMenuItemDialog({ children, onAddItem, open, onOpenChange }: A
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      description: "",
       ingredients: "",
       imageUrl: "",
       dietaryInfo: "veg",
-      calories: "",
-      protein: "",
-      carbs: "",
-      fat: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const newItem: Omit<MenuItem, "id" | "votes"> = {
         title: values.title,
-        description: values.description,
         day: values.day as DayOfWeek,
         category: values.category as MenuCategory,
         ingredients: values.ingredients.split(",").map((i) => i.trim()),
         imageUrl: values.imageUrl,
         imageHint: "custom dish",
         dietaryInfo: values.dietaryInfo as 'veg' | 'non-veg',
-        nutrition: {
-            calories: values.calories,
-            protein: values.protein,
-            carbs: values.carbs,
-            fat: values.fat,
-        }
     };
     onAddItem(newItem);
     toast({
@@ -130,19 +113,6 @@ export function AddMenuItemDialog({ children, onAddItem, open, onOpenChange }: A
                   <FormLabel>Dish Title</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., 'Spicy Chicken Ramen'" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="A short, enticing description of the dish." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -260,63 +230,6 @@ export function AddMenuItemDialog({ children, onAddItem, open, onOpenChange }: A
                 </FormItem>
               )}
             />
-            <div>
-              <h3 className="mb-4 text-lg font-medium">Nutritional Facts (per serving)</h3>
-              <div className="grid grid-cols-2 gap-4">
-                 <FormField
-                  control={form.control}
-                  name="calories"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Calories</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 550 kcal" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="protein"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Protein</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 25g" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="carbs"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Carbohydrates</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 60g" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="fat"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fat</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 20g" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
             <DialogFooter>
                 <DialogClose asChild>
                     <Button type="button" variant="secondary">Cancel</Button>
@@ -356,5 +269,3 @@ export default function AddMenuItemDialogClient({ children, onAddItem }: AddMenu
         </AddMenuItemDialog>
     );
 }
-
-    

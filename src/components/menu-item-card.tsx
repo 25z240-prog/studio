@@ -14,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -74,27 +73,13 @@ export default function MenuItemCard({ item, rank, onVote, onRevokeVote, isVoted
       </CardHeader>
       <CardContent className="flex-1 p-4 bg-transparent">
         <CardTitle className="font-headline text-xl mb-1">{item.title}</CardTitle>
-        <CardDescription>{item.description}</CardDescription>
         
-        <Tabs defaultValue="ingredients" className="w-full mt-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
-            <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
-          </TabsList>
-          <TabsContent value="ingredients" className="text-sm mt-4 min-h-[100px]">
-            <ul className="list-disc pl-5 space-y-1">
-              {item.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
-            </ul>
-          </TabsContent>
-          <TabsContent value="nutrition" className="text-sm mt-4 min-h-[100px]">
-             <div className="grid grid-cols-2 gap-2">
-                <p><strong>Calories:</strong> {item.nutrition.calories}</p>
-                <p><strong>Protein:</strong> {item.nutrition.protein}</p>
-                <p><strong>Carbs:</strong> {item.nutrition.carbs}</p>
-                <p><strong>Fat:</strong> {item.nutrition.fat}</p>
-             </div>
-          </TabsContent>
-        </Tabs>
+        <div className="text-sm mt-4 min-h-[100px]">
+          <h4 className="font-semibold mb-2">Ingredients</h4>
+          <ul className="list-disc pl-5 space-y-1">
+            {item.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+          </ul>
+        </div>
       </CardContent>
       <CardFooter className="p-4 bg-transparent border-t flex justify-between items-center">
         <div className="flex items-center gap-2">

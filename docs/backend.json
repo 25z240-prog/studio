@@ -23,10 +23,6 @@
           "description": "URL of the photo of the menu item.",
           "format": "uri"
         },
-        "nutritionalFacts": {
-          "type": "string",
-          "description": "Nutritional information about the menu item."
-        },
         "isVegan": {
           "type": "boolean",
           "description": "Indicates whether the menu item is vegan."
@@ -45,7 +41,6 @@
         "title",
         "ingredients",
         "photoUrl",
-        "nutritionalFacts",
         "isVegan",
         "isVegetarian",
         "submitterId"
