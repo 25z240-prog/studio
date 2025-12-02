@@ -11,7 +11,7 @@ export type MenuItem = {
   title: string;
   category: MenuCategory;
   day: DayOfWeek;
-  ingredients: string[];
+  ingredients: string;
   imageUrl: string;
   imageHint: string;
   dietaryInfo: DietaryInfo;

@@ -23,5 +23,11 @@ service cloud.firestore {
       allow create: if isOwner(userId); // User can create their own document
       allow write: if isOwner(userId); // User can update their own document
     }
+
+    match /menuItems/{menuItemId} {
+      allow read: if isSignedIn();
+      allow create: if isManagement();
+      allow update, delete: if isManagement();
+    }
   }
 }

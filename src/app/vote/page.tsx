@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useMemo } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
 import { LogOut, UserCircle } from "lucide-react";
@@ -9,16 +9,21 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useAuth, useFirebase } from "@/firebase";
+import { useAuth, useFirebase, useCollection, useMemoFirebase } from "@/firebase";
+import { AddMenuItemDialog } from "@/components/add-menu-item-dialog";
+import { collection } from 'firebase/firestore';
 
 function VotePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const role = searchParams.get('role');
   
-  const { user, isUserLoading } = useFirebase();
+  const { user, isUserLoading, firestore } = useFirebase();
   const auth = useAuth();
   
+  const menuItemsRef = useMemoFirebase(() => firestore ? collection(firestore, 'menuItems') : null, [firestore]);
+  const { data: menuItems, isLoading: isLoadingMenuItems } = useCollection(menuItemsRef);
+
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/login');
@@ -31,7 +36,7 @@ function VotePageContent() {
     router.push('/login');
   };
   
-  if (isUserLoading) {
+  if (isUserLoading || isLoadingMenuItems) {
     return <div className="flex min-h-screen w-full flex-col items-center justify-center"><p>Loading...</p></div>;
   }
 
@@ -46,6 +51,7 @@ function VotePageContent() {
             </h1>
           </Link>
           <div className="flex items-center gap-4">
+            {role === 'management' && <AddMenuItemDialog />}
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -77,9 +83,16 @@ function VotePageContent() {
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-headline text-foreground">
               Welcome
             </h2>
-            <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
-              The menu voting system is currently not active. Please check back later.
-            </p>
+            {menuItems.length === 0 ? (
+                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
+                 No menu items available for voting. Management can add items.
+               </p>
+            ) : (
+                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
+                    The menu voting system is currently not active. Please check back later.
+                </p>
+            )}
+           
           </div>
         </section>
       </main>

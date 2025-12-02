@@ -26,6 +26,73 @@
         "name",
         "email"
       ]
+    },
+    "MenuItem": {
+      "title": "Menu Item",
+      "type": "object",
+      "description": "Represents a menu item in the hostel mess.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The name of the menu item."
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "breakfast",
+            "lunch",
+            "snack",
+            "dinner"
+          ],
+          "description": "The meal category (e.g., breakfast, lunch)."
+        },
+        "day": {
+          "type": "string",
+          "enum": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "description": "The day of the week the item is served."
+        },
+        "ingredients": {
+          "type": "string",
+          "description": "A comma-separated list of main ingredients."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL for the menu item's image.",
+          "format": "uri"
+        },
+        "imageHint": {
+          "type": "string",
+          "description": "A hint for AI image generation."
+        },
+        "dietaryInfo": {
+          "type": "string",
+          "enum": [
+            "veg",
+            "non-veg"
+          ],
+          "description": "Dietary information (e.g., veg, non-veg)."
+        },
+        "votes": {
+          "type": "number",
+          "description": "The total number of votes for the menu item."
+        }
+      },
+      "required": [
+        "title",
+        "category",
+        "day",
+        "imageUrl",
+        "imageHint",
+        "dietaryInfo"
+      ]
     }
   },
   "auth": {
@@ -51,8 +118,24 @@
             }
           ]
         }
+      },
+      {
+        "path": "/menuItems/{menuItemId}",
+        "definition": {
+          "entityName": "MenuItem",
+          "schema": {
+            "$ref": "#/backend/entities/MenuItem"
+          },
+          "description": "Stores all available menu items for voting.",
+          "params": [
+            {
+              "name": "menuItemId",
+              "description": "The unique identifier for the menu item."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support a hostel menu voting application with a focus on security, scalability, and ease of debugging. It leverages denormalization for authorization independence and structural segregation for simplified security rules. The core entities are `User`, `MenuItem`, and `Vote`.  User data is stored under the `/users/{userId}` path. Menu items, owned by users, are stored under `/menuItems/{menuItemId}`. This collection stores a `submitterId` to tie the `MenuItem` back to the `User`, but the security rule doesn't need to 'get()' the User document because the `submitterId` is present. Votes for each menu item are kept under `/menuItems/{menuItemId}/votes/{voteId}`. This structure enables performant `list` operations and simplifies security rule definitions.  This design enforces Authorization Independence, since the security rules for votes will rely on the `voterId` field within the `Vote` document itself to ensure that only the user who created the vote can modify/delete it. This avoids the need to `get()` the `User` document in the security rules."
+    "reasoning": "The Firestore structure is designed to support a hostel menu voting application. It includes a 'users' collection to store user profiles and a 'menuItems' collection to store the menu items available for voting. This structure allows for easy querying of menu items and separates user data from application data, which simplifies security rules and data management."
   }
 }
