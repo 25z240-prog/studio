@@ -79,10 +79,6 @@
             "non-veg"
           ],
           "description": "Dietary information (e.g., veg, non-veg)."
-        },
-        "votes": {
-          "type": "number",
-          "description": "The total number of votes for the menu item."
         }
       },
       "required": [

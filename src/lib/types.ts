@@ -15,5 +15,4 @@ export type MenuItem = {
   imageUrl: string;
   imageHint: string;
   dietaryInfo: DietaryInfo;
-  votes: number;
 };

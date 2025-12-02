@@ -28,7 +28,7 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create: if isManagement();
       allow delete: if isManagement();
-      allow update: if isManagement() || (isStudent() && request.resource.data.votes == request.resource.data.votes + 1);
+      allow update: if isManagement();
     }
   }
 }
