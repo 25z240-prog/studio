@@ -40,6 +40,7 @@ import { type MenuItem, type MenuCategory, type DayOfWeek } from "@/lib/types";
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
+  imageUrl: z.string().url("Please enter a valid image URL."),
   day: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"], {
     required_error: "You need to select a day."
   }),
@@ -47,7 +48,6 @@ const formSchema = z.object({
     required_error: "You need to select a category."
   }),
   ingredients: z.string().min(1, "Please list at least one ingredient."),
-  imageUrl: z.string().url("Please enter a valid image URL."),
   dietaryInfo: z.enum(["veg", "non-veg"], {
     required_error: "You need to select a dietary option."
   }),
@@ -201,7 +201,7 @@ export default function AddMenuItemDialog({ children, onAddItem, open, onOpenCha
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a category" />
-                        </Trigger>
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="breakfast">Breakfast</SelectItem>
