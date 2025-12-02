@@ -59,6 +59,12 @@
       "description": "A crispy, paper-thin ghee roast dosa, rolled into a perfect cone shape.",
       "imageUrl": "https://www.vegrecipesofindia.com/wp-content/uploads/2021/06/ghee-roast-dosa-1.jpg",
       "imageHint": "ghee roast"
+    },
+    {
+      "id": "masala-vada",
+      "description": "Crispy and savory deep fried fritter made from chana dal and spices.",
+      "imageUrl": "https://www.vegrecipesofindia.com/wp-content/uploads/2022/12/masala-vadai-1.jpg",
+      "imageHint": "masala vada"
     }
   ]
 }

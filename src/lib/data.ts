@@ -92,6 +92,18 @@ export const initialMenuItems: Omit<MenuItem, "id" | "votes">[] = [
     submitterId: 'management',
   },
   {
+    title: 'Masala Vada',
+    description: 'A popular South Indian crispy and savory deep fried fritter made from chana dal and spices.',
+    category: 'snack',
+    day: 'tuesday',
+    ingredients: ['Chana dal', 'Onion', 'Ginger', 'Garlic', 'Green chilies', 'Fennel seeds', 'Coriander leaves', 'Oil for frying'],
+    imageUrl: getImage('masala-vada'),
+    imageHint: 'masala vada',
+    dietaryInfo: 'veg',
+    nutrition: { calories: '250 kcal', protein: '10g', carbs: '30g', fat: '10g' },
+    submitterId: 'management',
+  },
+  {
     title: 'Egg Puffs',
     description: 'A savory puff pastry snack with a spicy egg masala filling. A flaky and delicious treat, perfect for evenings.',
     category: 'snack',
