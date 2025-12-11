@@ -9,7 +9,17 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
-import { fetchSignInMethodsForEmail } from "firebase/auth";
+import { fetchSignInMethodsForEmail, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function StudentLoginPage() {
   const router = useRouter();
@@ -17,7 +27,12 @@ export default function StudentLoginPage() {
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [password, setPassword] = useState("");
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
 
   useEffect(() => {
     const storedEmail = localStorage.getItem("student_email");
@@ -26,9 +41,9 @@ export default function StudentLoginPage() {
     }
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsCheckingEmail(true);
     
     if (!auth) {
       toast({
@@ -36,7 +51,7 @@ export default function StudentLoginPage() {
         title: "Initialization Error",
         description: "Authentication service is not ready. Please try again.",
       });
-      setIsSubmitting(false);
+      setIsCheckingEmail(false);
       return;
     }
     
@@ -47,7 +62,7 @@ export default function StudentLoginPage() {
         title: "Invalid Email Format",
         description: "Please use your official student email. e.g., '24cs100@psgitech.ac.in'.",
       });
-      setIsSubmitting(false);
+      setIsCheckingEmail(false);
       return;
     }
 
@@ -56,8 +71,8 @@ export default function StudentLoginPage() {
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
       
       if (signInMethods.length > 0) {
-        // User exists, go to password page.
-        router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
+        // User exists, show password dialog.
+        setShowPasswordDialog(true);
       } else {
         // User does not exist, go to create password page.
         router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
@@ -69,11 +84,43 @@ export default function StudentLoginPage() {
         title: "Authentication Error",
         description: "Could not verify your email at this time. Please try again.",
       });
-      setIsSubmitting(false);
+    } finally {
+        setIsCheckingEmail(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    if (!auth) {
+        toast({ variant: "destructive", title: "Error", description: "Auth service not available." });
+        setIsLoggingIn(false);
+        return;
+    }
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast({
+            title: "Login Successful",
+            description: "Welcome back! Redirecting to the voting page.",
+        });
+        router.push('/vote?role=student');
+    } catch (error: any) {
+        let description = "An unexpected error occurred. Please try again.";
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-password') {
+            description = "The password you entered is incorrect. Please try again.";
+        } else if (error.code === 'auth/user-not-found') {
+            description = "No account found with this email. This shouldn't happen here.";
+        } else if (error.code === 'auth/too-many-requests') {
+            description = "Access to this account has been temporarily disabled due to many failed login attempts.";
+        }
+        toast({ variant: "destructive", title: "Login Failed", description });
+    } finally {
+        setIsLoggingIn(false);
     }
   };
 
   return (
+    <>
     <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
       <div className="w-full max-w-md rounded-xl border border-border bg-card/80 p-8 shadow-2xl backdrop-blur-lg">
         <div className="text-center">
@@ -85,7 +132,7 @@ export default function StudentLoginPage() {
             <p className="mt-2 text-sm text-muted-foreground">to continue to Hostel Mess Voting</p>
         </div>
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleEmailSubmit}>
             <div className="grid gap-2 mt-8">
                 <Input 
                     id="email" 
@@ -94,7 +141,7 @@ export default function StudentLoginPage() {
                     value={email} 
                     onChange={(e) => setEmail(e.target.value)} 
                     required 
-                    disabled={isSubmitting}
+                    disabled={isCheckingEmail}
                     className="h-12 text-base"
                 />
             </div>
@@ -107,12 +154,56 @@ export default function StudentLoginPage() {
                 <Button variant="link" asChild className="p-0">
                     <Link href="/login">Back to role selection</Link>
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="w-24">
-                    {isSubmitting ? "Checking..." : "Next"}
+                <Button type="submit" disabled={isCheckingEmail} className="w-24">
+                    {isCheckingEmail ? "Checking..." : "Next"}
                 </Button>
             </div>
         </form>
       </div>
     </div>
+    <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+             <DialogHeader>
+                <DialogTitle className="font-headline text-2xl">Welcome back</DialogTitle>
+                <DialogDescription>
+                    Enter your password to sign in as <span className="font-medium text-foreground">{email}</span>.
+                </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handlePasswordSubmit}>
+                <div className="grid gap-4 py-4">
+                    <div className="grid gap-2 relative">
+                        <Label htmlFor="password-dialog" className="sr-only">Password</Label>
+                        <Input
+                            id="password-dialog"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            disabled={isLoggingIn}
+                            className="h-12 text-base pr-12"
+                        />
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1 h-10 w-10 text-muted-foreground"
+                            onClick={() => setShowPassword(!showPassword)}
+                            disabled={isLoggingIn}
+                        >
+                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+                        </Button>
+                    </div>
+                </div>
+                 <DialogFooter>
+                    <Button type="submit" className="w-full" disabled={isLoggingIn}>
+                        {isLoggingIn ? "Signing in..." : "Sign In"}
+                    </Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }
