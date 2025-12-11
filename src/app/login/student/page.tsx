@@ -31,31 +31,31 @@ export default function StudentLoginPage() {
     setIsSubmitting(true);
 
     if (!auth) {
-        toast({
-            variant: "destructive",
-            title: "Initialization Error",
-            description: "Authentication service is not ready. Please try again.",
-        });
-        setIsSubmitting(false);
-        return;
+      toast({
+        variant: "destructive",
+        title: "Initialization Error",
+        description: "Authentication service is not ready. Please try again.",
+      });
+      setIsSubmitting(false);
+      return;
     }
     
     const emailRegex = /^(2[0-5])([a-z]+[0-9]{1,3}|[0-9]{1,3}[a-z]+)@psgitech\.ac\.in$/i;
     if (!emailRegex.test(email)) {
-        toast({
-            variant: "destructive",
-            title: "Invalid Email Format",
-            description: "Please use your official student email. e.g., '24cs100@psgitech.ac.in'.",
-        });
-        setIsSubmitting(false);
-        return;
+      toast({
+        variant: "destructive",
+        title: "Invalid Email Format",
+        description: "Please use your official student email. e.g., '24cs100@psgitech.ac.in'.",
+      });
+      setIsSubmitting(false);
+      return;
     }
 
     try {
       localStorage.setItem("student_email", email);
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-
-      if (signInMethods && signInMethods.length > 0) {
+      
+      if (signInMethods.length > 0) {
         // User exists, go to password page.
         router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
       } else {
@@ -63,15 +63,16 @@ export default function StudentLoginPage() {
         router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
       }
     } catch (error) {
-        console.error("Error checking sign-in methods:", error);
-        toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: "Could not verify your email at this time. Please try again.",
-        });
-        setIsSubmitting(false);
+      console.error("Error checking sign-in methods:", error);
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Could not verify your email at this time. Please try again.",
+      });
+      setIsSubmitting(false);
     }
-    // No need to setIsSubmitting(false) here because the router push will navigate away.
+    // The router push will handle navigation, so we don't need to set isSubmitting to false here
+    // unless an error occurs, which is handled in the catch block.
   };
 
   return (
@@ -108,8 +109,8 @@ export default function StudentLoginPage() {
                 <Button variant="link" asChild className="p-0">
                     <Link href="/login">Back to role selection</Link>
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Continuing..." : "Next"}
+                <Button type="submit" disabled={isSubmitting} className="w-24">
+                    {isSubmitting ? "Checking..." : "Next"}
                 </Button>
             </div>
         </form>
