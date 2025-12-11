@@ -97,8 +97,8 @@ function CreatePasswordContent() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Create Your Password</CardTitle>
-          <CardDescription>Welcome! Set a password for your account: {email}</CardDescription>
+          <CardTitle className="text-2xl font-headline">Enter Password</CardTitle>
+          <CardDescription>Welcome! Set a password for your new account: {email}</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-4">
