@@ -28,48 +28,50 @@ export default function StudentLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     if (!auth) {
         toast({
             variant: "destructive",
             title: "Initialization Error",
-            description: "Authentication service is not ready. Please wait a moment and try again.",
+            description: "Authentication service is not ready. Please try again.",
         });
+        setIsSubmitting(false);
         return;
     }
-
-    setIsSubmitting(true);
     
     const emailRegex = /^(2[0-5])([a-z]+[0-9]{1,3}|[0-9]{1,3}[a-z]+)@psgitech\.ac\.in$/i;
     if (!emailRegex.test(email)) {
         toast({
             variant: "destructive",
             title: "Invalid Email Format",
-            description: "Please use your official student email. Format examples: '25cs240@psgitech.ac.in' or '25z240@psgitech.ac.in'. Year must be 20-25.",
+            description: "Please use your official student email. e.g., '24cs100@psgitech.ac.in'.",
         });
         setIsSubmitting(false);
         return;
     }
 
-    localStorage.setItem("student_email", email);
-
     try {
+      localStorage.setItem("student_email", email);
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      if (signInMethods.length > 0) {
-        // User EXISTS, so we redirect them to the enter password page to log in.
+
+      if (signInMethods && signInMethods.length > 0) {
+        // User exists, go to password page.
         router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
       } else {
-        // User DOES NOT exist, so we redirect them to the create password page to register.
+        // User does not exist, go to create password page.
         router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
       }
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error checking sign-in methods:", error);
         toast({
             variant: "destructive",
             title: "Authentication Error",
-            description: "Could not verify your email at this time. Please try again later.",
+            description: "Could not verify your email at this time. Please try again.",
         });
         setIsSubmitting(false);
     }
+    // No need to setIsSubmitting(false) here because the router push will navigate away.
   };
 
   return (
