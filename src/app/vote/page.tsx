@@ -70,9 +70,12 @@ function VotePageContent() {
   }
   
   const renderCategory = (day: DayOfWeek, category: MenuCategory) => {
-    const items = groupedMenuItems[day]
-      ?.filter(item => item.category === category)
-      .sort((a, b) => (b.votes || 0) - (a.votes || 0));
+    const filteredItems = groupedMenuItems[day]
+      ?.filter(item => item.category === category);
+
+    const items = role === 'management' 
+      ? filteredItems?.sort((a, b) => (b.votes || 0) - (a.votes || 0))
+      : filteredItems;
 
     if (!items || items.length === 0) {
       return <p className="text-muted-foreground text-center py-8">No items for {category} on {day}.</p>;
