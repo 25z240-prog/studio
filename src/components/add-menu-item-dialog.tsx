@@ -51,18 +51,19 @@ export function AddMenuItemDialog() {
     }
 
     const formData = new FormData(event.currentTarget);
+    const title = formData.get('title') as string;
     const newItem = {
-      title: formData.get('title') as string,
+      title: title,
       category: formData.get('category') as MenuCategory,
       day: formData.get('day') as DayOfWeek,
       dietaryInfo: formData.get('dietaryInfo') as DietaryInfo,
       ingredients: formData.get('ingredients') as string,
-      imageUrl: formData.get('imageUrl') as string,
+      imageUrl: `https://picsum.photos/seed/${encodeURIComponent(title)}/600/400`,
       imageHint: "food meal",
       votes: 0,
     };
 
-    if (!newItem.title || !newItem.category || !newItem.day || !newItem.dietaryInfo || !newItem.imageUrl) {
+    if (!newItem.title || !newItem.category || !newItem.day || !newItem.dietaryInfo) {
         toast({ variant: "destructive", title: "Missing Fields", description: "Please fill out all required fields." });
         setIsSubmitting(false);
         return;
@@ -155,12 +156,6 @@ export function AddMenuItemDialog() {
                 Ingredients
               </Label>
               <Textarea id="ingredients" name="ingredients" placeholder="e.g., Rice, lentils, spices" className="col-span-3" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="imageUrl" className="text-right">
-                Image URL
-              </Label>
-              <Input id="imageUrl" name="imageUrl" className="col-span-3" placeholder="https://example.com/image.jpg" required />
             </div>
           </div>
           <DialogFooter>

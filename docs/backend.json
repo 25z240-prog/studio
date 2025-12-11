@@ -93,7 +93,6 @@
         "title",
         "category",
         "day",
-        "imageUrl",
         "imageHint",
         "dietaryInfo",
         "votes"
@@ -215,5 +214,3 @@
     "reasoning": "The Firestore structure is designed to support a hostel menu voting application. It includes a 'users' collection for profiles, a 'menuItems' collection for votable items, and a 'userVotes' collection to enforce the one-vote-per-user-per-item rule. The 'menuState' collection manages the lifecycle of the menu, such as finalization. This structure separates user data, application data, voting records, and state management for clear organization and security."
   }
 }
-
-    
