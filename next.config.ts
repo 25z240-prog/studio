@@ -113,6 +113,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https" as const,
+        hostname: "www.eatingwell.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
