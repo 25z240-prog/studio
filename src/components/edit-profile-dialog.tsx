@@ -91,7 +91,7 @@ export function EditProfileDialog({ user }: EditProfileDialogProps) {
         <DialogTrigger asChild>
           <button className="flex items-center w-full">
             <UserIcon className="mr-2 h-4 w-4" />
-            <span>Manage Account</span>
+            <span>Change user name</span>
           </button>
         </DialogTrigger>
       </DropdownMenuItem>
