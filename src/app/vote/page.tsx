@@ -38,9 +38,9 @@ function VotePageContent() {
   const { data: menuItems, isLoading: isLoadingMenuItems } = useCollection<MenuItem>(menuItemsRef);
 
   const menuStateRef = useMemoFirebase(() => {
-      if (!firestore) return null;
+      if (!firestore || !user) return null;
       return doc(firestore, 'menuState', 'weekly');
-  }, [firestore]);
+  }, [firestore, user]);
   const { data: menuState, isLoading: isLoadingMenuState } = useDoc<MenuState>(menuStateRef);
 
   const isFinalized = menuState?.isFinalized || false;
