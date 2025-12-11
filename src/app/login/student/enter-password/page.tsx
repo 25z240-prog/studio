@@ -46,6 +46,7 @@ function EnterPasswordContent() {
     }
 
     setIsSubmitting(true);
+    toast({ title: "Logging in...", description: "Please wait." });
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
