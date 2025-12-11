@@ -120,7 +120,7 @@ function CreatePasswordContent() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button className="w-full" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating Account..." : "Create Account & Login"}
+              {isSubmitting ? "Creating Account..." : "Login"}
             </Button>
             <Button variant="link" size="sm" asChild>
               <Link href="/login/student">Back to email entry</Link>
