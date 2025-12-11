@@ -10,13 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/firebase/provider";
-import { fetchSignInMethodsForEmail } from "firebase/auth";
+import { useFirestore } from "@/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function StudentLoginPage() {
   const router = useRouter();
-  const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
@@ -42,12 +42,11 @@ export default function StudentLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Strict guard clause: do not proceed if auth is not ready.
-    if (!auth) {
+    if (!firestore) {
         toast({
             variant: "destructive",
             title: "Initialization Error",
-            description: "Authentication service is not ready. Please wait a moment and try again.",
+            description: "Database service is not ready. Please wait a moment and try again.",
         });
         return;
     }
@@ -66,19 +65,29 @@ export default function StudentLoginPage() {
     }
 
     try {
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      
+      const usersRef = collection(firestore, "users");
+      const q = query(usersRef, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+
       if (rememberMe) {
         localStorage.setItem("student_email", email);
       } else {
         localStorage.removeItem("student_email");
       }
       
-      if (signInMethods.length > 0) {
-        // User exists, go to enter password page
+      let userExists = false;
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0].data();
+        if (userDoc.hasPassword) {
+          userExists = true;
+        }
+      }
+
+      if (userExists) {
+        // User exists and has a password, go to enter password page
         router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
       } else {
-        // New user, go to create password page
+        // New user or user without a password, go to create password page
         router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
       }
 
