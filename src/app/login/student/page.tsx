@@ -105,9 +105,9 @@ export default function StudentLoginPage() {
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(checked) => handleRememberMeChange(checked as boolean)} disabled={isSubmitting}/>
-              <Label htmlFor="remember-me" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label htmlFor="remember-me" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Remember me
-              </Label>
+              </label>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
