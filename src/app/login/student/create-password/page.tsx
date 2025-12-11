@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
-import { createUserWithEmailAndPassword, updateProfile, AuthErrorCodes, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, AuthErrorCodes, fetchSignInMethodsForEmail } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -26,6 +26,7 @@ function CreatePasswordPageContent() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const email = searchParams.get('email');
 
@@ -37,8 +38,38 @@ function CreatePasswordPageContent() {
                 description: "Email not provided. Please go back and start again.",
             });
             router.push('/login/student');
+            return;
         }
-    }, [email, router, toast]);
+
+        if (!auth) {
+            // Auth might not be initialized yet, wait for it.
+            return;
+        }
+
+        const checkUser = async () => {
+            try {
+                const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+                if (signInMethods.length > 0) {
+                    // User exists, redirect to enter password page
+                    router.replace(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
+                } else {
+                    // New user, show the page content
+                    setIsLoading(false);
+                }
+            } catch (error) {
+                console.error("Error checking for email:", error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Could not verify your email. Please try again.",
+                });
+                setIsLoading(false);
+            }
+        };
+
+        checkUser();
+
+    }, [email, auth, router, toast]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -60,7 +91,7 @@ function CreatePasswordPageContent() {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            const name = email.split('@')[0].replace(/[0-9]/g, '').replace(/\./g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+            const name = email.split('@')[0].replace(/[0-9.]/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()).trim();
             await updateProfile(user, { displayName: name });
             
             const userDocRef = doc(firestore, "users", user.uid);
@@ -82,6 +113,7 @@ function CreatePasswordPageContent() {
             let description = "An unexpected error occurred. Please try again.";
             if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
                 description = "This email is already registered. Please go back and log in.";
+                router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
             } else if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
                 description = "The password is too weak. Please use a stronger password.";
             }
@@ -90,6 +122,15 @@ function CreatePasswordPageContent() {
             setIsSubmitting(false);
         }
     };
+    
+    if (isLoading || !email) {
+      return (
+        <div className="flex min-h-screen w-full flex-col items-center justify-center">
+            <p>Verifying email...</p>
+        </div>
+      );
+    }
+
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
