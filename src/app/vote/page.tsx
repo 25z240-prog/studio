@@ -28,7 +28,10 @@ function VotePageContent() {
   const { user, isUserLoading, firestore } = useFirebase();
   const auth = useAuth();
   
-  const menuItemsRef = useMemoFirebase(() => firestore ? collection(firestore, 'menuItems') : null, [firestore]);
+  const menuItemsRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, 'menuItems');
+  }, [firestore, user]);
   const { data: menuItems, isLoading: isLoadingMenuItems } = useCollection<MenuItem>(menuItemsRef);
 
   useEffect(() => {
@@ -180,5 +183,3 @@ export default function VotePage() {
     </Suspense>
   );
 }
-
-    
