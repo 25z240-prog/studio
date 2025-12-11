@@ -63,7 +63,7 @@ function CreatePasswordPageContent() {
                     title: "Error",
                     description: "Could not verify your email. Please try again.",
                 });
-                setIsLoading(false);
+                router.push('/login/student');
             }
         };
 
@@ -188,8 +188,10 @@ function CreatePasswordPageContent() {
 
 export default function StudentCreatePasswordPage() {
     return (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div className="flex min-h-screen w-full flex-col items-center justify-center"><p>Loading...</p></div>}>
         <CreatePasswordPageContent />
       </Suspense>
     );
 }
+
+    
