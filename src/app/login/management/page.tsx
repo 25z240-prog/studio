@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useAuth } from "@/firebase/provider";
 import { Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function ManagementLoginPage() {
   const router = useRouter();
@@ -54,7 +55,11 @@ export default function ManagementLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
+    <motion.div 
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
        <div className="flex items-center gap-3 mb-8">
             <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={40} height={40} alt="PSG iTech Logo" />
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-headline text-foreground whitespace-nowrap">
@@ -98,8 +103,6 @@ export default function ManagementLoginPage() {
           </CardFooter>
         </form>
       </Card>
-    </div>
+    </motion.div>
   );
 }
-
-    

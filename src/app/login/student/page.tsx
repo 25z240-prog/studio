@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function StudentLoginPage() {
   const router = useRouter();
@@ -199,7 +200,11 @@ export default function StudentLoginPage() {
 
   return (
     <>
-      <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
         <div className="w-full max-w-md rounded-xl border border-border bg-card/80 p-8 shadow-2xl backdrop-blur-lg">
           <div className="text-center">
               <div className="flex justify-center items-center gap-3 mb-4">
@@ -226,10 +231,6 @@ export default function StudentLoginPage() {
                   />
               </div>
 
-              <p className="mt-4 px-1 text-sm text-muted-foreground">
-                  Not your computer? Use a private window to sign in.
-              </p>
-
               <div className="mt-6 flex items-center justify-between">
                   <Button variant="link" asChild className="p-0">
                       <Link href="/login">Back to role selection</Link>
@@ -240,7 +241,7 @@ export default function StudentLoginPage() {
               </div>
           </form>
         </div>
-      </div>
+      </motion.div>
 
       {/* Enter Password Dialog for Existing Users */}
       <Dialog open={showPasswordDialog} onOpenChange={closePasswordDialog}>

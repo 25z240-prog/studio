@@ -20,9 +20,29 @@ import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { FinalizeMenuDialog } from "@/components/finalize-menu-dialog";
 import { ResetMenuDialog } from "@/components/reset-menu-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const categories: MenuCategory[] = ['breakfast', 'lunch', 'snack', 'dinner'];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+  },
+};
+
 
 function VotePageContent() {
   const searchParams = useSearchParams();
@@ -149,17 +169,23 @@ function VotePageContent() {
     }
   
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <motion.div 
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {items.map((item, index) => (
-          <MenuItemCard 
-            key={item.id} 
-            item={item} 
-            role={role as 'student' | 'management'} 
-            rank={role === 'management' ? index + 1 : undefined}
-            isFinalized={isFinalized}
-          />
+          <motion.div key={item.id} variants={itemVariants}>
+            <MenuItemCard 
+              item={item} 
+              role={role as 'student' | 'management'} 
+              rank={role === 'management' ? index + 1 : undefined}
+              isFinalized={isFinalized}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     );
   };
 
@@ -173,9 +199,9 @@ function VotePageContent() {
               PSG iTech Hostel Mess
             </h1>
           </Link>
-          <div className="flex items-center gap-2">
+           <div className="flex items-center gap-2">
              {role === 'management' && (
-              <>
+              <div className="flex items-center gap-2 flex-wrap justify-end">
                 {isFinalized ? (
                   <ResetMenuDialog />
                 ) : (
@@ -184,7 +210,7 @@ function VotePageContent() {
                     <AddMenuItemDialog />
                   </>
                 )}
-              </>
+              </div>
             )}
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -214,7 +240,11 @@ function VotePageContent() {
         </div>
       </header>
       <main className="flex-1">
-        <section className="container mx-auto px-4 py-8 md:py-12">
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="container mx-auto px-4 py-8 md:py-12">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl font-headline text-foreground">
               Weekly Mess Menu
@@ -269,7 +299,7 @@ function VotePageContent() {
             </div>
           )}
 
-        </section>
+        </motion.section>
       </main>
       <footer className="py-6 md:px-8 md:py-0 border-t border-white/10">
         <div className="container flex flex-col items-center justify-center gap-4 md:h-24 md:flex-row">
