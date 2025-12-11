@@ -85,7 +85,7 @@ export default function StudentLoginPage() {
             <p className="mt-2 text-sm text-muted-foreground">to continue to Hostel Mess Voting</p>
         </div>
         
-        <form onSubmit={handleSubmit} className="mt-8">
+        <form onSubmit={handleSubmit}>
             <div className="grid gap-2">
                 <Input 
                     id="email" 
