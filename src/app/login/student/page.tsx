@@ -59,18 +59,19 @@ export default function StudentLoginPage() {
 
     try {
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      const isNewUser = signInMethods.length === 0;
-
+      
       if (rememberMe) {
         localStorage.setItem("student_email", email);
       } else {
         localStorage.removeItem("student_email");
       }
       
-      if (isNewUser) {
-        router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
-      } else {
+      if (signInMethods.length > 0) {
+        // User exists, go to enter password page
         router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
+      } else {
+        // New user, go to create password page
+        router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
       }
 
     } catch (error: any) {
