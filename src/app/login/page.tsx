@@ -1,11 +1,10 @@
-
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield } from "lucide-react";
+import { Shield, User } from "lucide-react";
 
 export default function LoginPage() {
   return (
@@ -21,9 +20,15 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-headline">Login</CardTitle>
           <CardDescription>Please choose your login type to continue.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+           <Link href="/login/student" passHref>
+            <Button variant="outline" className="w-full h-20 text-lg">
+              <User className="mr-3 h-6 w-6" />
+              Student Login
+            </Button>
+          </Link>
           <Link href="/login/management" passHref>
-            <Button variant="outline" className="w-full h-16 text-lg">
+            <Button variant="outline" className="w-full h-20 text-lg">
               <Shield className="mr-3 h-6 w-6" />
               Management Login
             </Button>
