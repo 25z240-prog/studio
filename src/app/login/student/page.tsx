@@ -42,7 +42,15 @@ export default function StudentLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth) return;
+    // Strict guard clause: do not proceed if auth is not ready.
+    if (!auth) {
+        toast({
+            variant: "destructive",
+            title: "Initialization Error",
+            description: "Authentication service is not ready. Please wait a moment and try again.",
+        });
+        return;
+    }
 
     setIsSubmitting(true);
     
