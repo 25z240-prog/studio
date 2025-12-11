@@ -93,6 +93,7 @@
         "title",
         "category",
         "day",
+        "imageUrl",
         "imageHint",
         "dietaryInfo",
         "votes"

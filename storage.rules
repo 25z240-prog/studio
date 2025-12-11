@@ -1,0 +1,16 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    function isManagement() {
+      return request.auth != null && request.auth.token.email == "management@psgitech.ac.in";
+    }
+
+    match /menuItems/{allPaths=**} {
+      // Allow public read access for all menu item images
+      allow read;
+      // Allow write access only for management users
+      allow write: if isManagement();
+    }
+  }
+}
