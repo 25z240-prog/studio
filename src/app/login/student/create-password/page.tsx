@@ -95,18 +95,20 @@ function CreatePasswordPageContent() {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await handleLoginSuccess(userCredential);
         } catch (error: any) {
+            if (error.code === 'auth/email-already-in-use') {
+                toast({
+                    title: "Account Exists",
+                    description: "An account with this email already exists. Redirecting to login...",
+                });
+                router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
+                return; 
+            }
+            
             let description = "An unexpected error occurred. Please try again.";
             if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
                 description = "Your password is too weak. Please choose a stronger one with at least 6 characters.";
-            } else if (error.code === 'auth/email-already-in-use') {
-                toast({
-                    variant: "destructive",
-                    title: "Account Exists",
-                    description: "This email is already registered. Redirecting to login...",
-                });
-                router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
-                return;
             }
+
             toast({
                 variant: "destructive",
                 title: "Registration Failed",
@@ -119,7 +121,7 @@ function CreatePasswordPageContent() {
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
-            <div className="flex items-center gap-3 mb-8">
+            <div className="flex flex-shrink-1 min-w-0 items-center gap-3 mb-8">
                 <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={40} height={40} alt="PSG iTech Logo" />
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-headline text-foreground whitespace-nowrap">
                     PSG iTech Hostel Mess
