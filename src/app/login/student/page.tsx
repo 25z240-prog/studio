@@ -15,8 +15,7 @@ import {
   fetchSignInMethodsForEmail, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
-  updateProfile,
-  AuthErrorCodes
+  updateProfile
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -101,7 +100,7 @@ export default function StudentLoginPage() {
           router.push('/vote?role=student');
         } catch (error: any) {
            let description = "An unexpected error occurred. Please try again.";
-           if (error.code === AuthErrorCodes.INVALID_PASSWORD || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+           if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                description = "The password you entered is incorrect. Please try again.";
            } else if (error.code === 'auth/too-many-requests') {
                description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
@@ -134,8 +133,10 @@ export default function StudentLoginPage() {
 
         } catch (error: any) {
             let description = "An unexpected error occurred. Please try again.";
-            if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
+            if (error.code === 'auth/weak-password') {
                 description = "The password is too weak. Please use a stronger password.";
+            } else if (error.code === 'auth/email-already-in-use') {
+                 description = "This email is already in use. Please go back and log in.";
             }
             toast({ variant: "destructive", title: "Registration Failed", description });
         }
