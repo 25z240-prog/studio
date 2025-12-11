@@ -86,7 +86,7 @@ export default function StudentLoginPage() {
         </div>
         
         <form onSubmit={handleSubmit}>
-            <div className="grid gap-2">
+            <div className="grid gap-2 mt-8">
                 <Input 
                     id="email" 
                     type="email" 
