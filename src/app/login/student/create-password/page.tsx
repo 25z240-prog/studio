@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
-import { createUserWithEmailAndPassword, updateProfile, AuthErrorCodes, fetchSignInMethodsForEmail } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, AuthErrorCodes } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -30,31 +30,15 @@ function CreatePasswordPageContent() {
     const email = searchParams.get('email');
 
     useEffect(() => {
-        const checkUser = async () => {
-            if (!auth || !email) {
-                toast({
-                    variant: "destructive",
-                    title: "Missing Information",
-                    description: "Email not provided. Please go back and start again.",
-                });
-                router.push('/login/student');
-                return;
-            }
-            try {
-                const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-                if (signInMethods.length > 0) {
-                     toast({
-                        title: "Account Exists",
-                        description: "An account with this email already exists. Redirecting to login.",
-                    });
-                    router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
-                }
-            } catch (error) {
-                // Ignore errors here, form submission will handle them
-            }
-        };
-        checkUser();
-    }, [email, auth, router, toast]);
+        if (!email) {
+            toast({
+                variant: "destructive",
+                title: "Missing Information",
+                description: "Email not provided. Please go back and start again.",
+            });
+            router.push('/login/student');
+        }
+    }, [email, router, toast]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -96,8 +80,7 @@ function CreatePasswordPageContent() {
         } catch (error: any) {
             let description = "An unexpected error occurred. Please try again.";
             if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
-                description = "An account with this email already exists. Redirecting to login page.";
-                router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
+                description = "An account with this email already exists.";
             } else if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
                 description = "The password is too weak. Please use a stronger password.";
             }
@@ -172,4 +155,3 @@ export default function StudentCreatePasswordPage() {
       </Suspense>
     );
 }
-
