@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth, useFirebase, useCollection, useMemoFirebase, useDoc } from "@/firebase";
 import { AddMenuItemDialog } from "@/components/add-menu-item-dialog";
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import { DayOfWeek, MenuCategory, type MenuItem, type MenuState } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,6 +19,7 @@ import { MenuItemCard } from "@/components/menu-item-card";
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { FinalizeMenuDialog } from "@/components/finalize-menu-dialog";
 import { ResetMenuDialog } from "@/components/reset-menu-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const categories: MenuCategory[] = ['breakfast', 'lunch', 'snack', 'dinner'];
@@ -27,9 +28,12 @@ function VotePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const role = searchParams.get('role');
+  const { toast } = useToast();
   
   const { user, isUserLoading, firestore } = useFirebase();
   const auth = useAuth();
+
+  const [finalizationTriggered, setFinalizationTriggered] = useState(false);
   
   const menuItemsRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -50,6 +54,42 @@ function VotePageContent() {
       router.push('/login');
     }
   }, [user, isUserLoading, router]);
+
+  // Effect for automatic finalization
+  useEffect(() => {
+    if (isLoadingMenuState || isFinalized || finalizationTriggered || !firestore || !user) {
+      return;
+    }
+
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // Sunday: 0, Monday: 1, ...
+
+    // Check if it's Monday (day 1)
+    if (dayOfWeek === 1) {
+      const finalize = async () => {
+        setFinalizationTriggered(true); // Prevent multiple triggers in the same session
+        try {
+          const menuStateRef = doc(firestore, 'menuState', 'weekly');
+          await setDoc(menuStateRef, { isFinalized: true }, { merge: true });
+          
+          toast({
+            title: "Menu Automatically Finalized",
+            description: "The menu for the week has been locked in based on votes.",
+          });
+        } catch (error: any) {
+          console.error("Auto-finalization failed:", error);
+          toast({
+            variant: "destructive",
+            title: "Auto-Finalization Failed",
+            description: "Could not automatically finalize the menu.",
+          });
+           setFinalizationTriggered(false); // Allow retry if it failed
+        }
+      };
+      
+      finalize();
+    }
+  }, [isLoadingMenuState, isFinalized, firestore, user, toast, finalizationTriggered]);
 
   const handleLogout = () => {
     auth?.signOut();
@@ -116,7 +156,7 @@ function VotePageContent() {
             item={item} 
             role={role as 'student' | 'management'} 
             rank={role === 'management' ? index + 1 : undefined}
-            isFinalized={isFinalized && role === 'student'}
+            isFinalized={isFinalized}
           />
         ))}
       </div>
@@ -244,3 +284,5 @@ export default function VotePage() {
     </Suspense>
   );
 }
+
+    

@@ -159,7 +159,7 @@ export function MenuItemCard({ item, role, rank, isFinalized = false }: MenuItem
             #{rank}
           </Badge>
         )}
-         {isFinalized && (
+         {isFinalized && role === 'student' && (
             <Badge
                 variant="default"
                 className="absolute top-2 right-2 text-base font-bold backdrop-blur-sm bg-green-600/90 text-white border-green-700/80"
