@@ -58,6 +58,8 @@ function EnterPasswordContent() {
       let description = "An unexpected error occurred. Please try again.";
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         description = "The password you entered is incorrect. Please try again.";
+      } else if (error.code === 'auth/user-not-found') {
+        description = "No account found with this email. Please go back and try a different email.";
       } else if (error.code === 'auth/too-many-requests') {
         description = "Access to this account has been temporarily disabled due to many failed login attempts.";
       }

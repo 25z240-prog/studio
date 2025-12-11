@@ -97,7 +97,7 @@ function CreatePasswordContent() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Enter Password</CardTitle>
+          <CardTitle className="text-2xl font-headline">Create Your Password</CardTitle>
           <CardDescription>{email}</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -120,7 +120,7 @@ function CreatePasswordContent() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button className="w-full" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating Account..." : "Login"}
+              {isSubmitting ? "Creating Account..." : "Create Account & Login"}
             </Button>
             <Button variant="link" size="sm" asChild>
               <Link href="/login/student">Back to email entry</Link>
