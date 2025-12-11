@@ -28,7 +28,6 @@ function EnterPasswordContent() {
     if (emailFromParams) {
       setEmail(emailFromParams);
     } else {
-      // If no email is in the URL, the user should start from the beginning.
       router.push("/login/student");
     }
   }, [searchParams, router]);
@@ -44,6 +43,16 @@ function EnterPasswordContent() {
       return;
     }
 
+    const emailRegex = /^(2[0-5])([a-z]+[0-9]{1,3}|[0-9]{1,3}[a-z]+)@psgitech\.ac\.in$/i;
+    if (!emailRegex.test(email)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Email",
+        description: "Only PSG iTech student emails are allowed.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -55,7 +64,7 @@ function EnterPasswordContent() {
       router.push('/vote?role=student');
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-password') {
         description = "The password you entered is incorrect. Please try again.";
       } else if (error.code === 'auth/user-not-found') {
         description = "No account found with this email. Please go back and use a different email.";
@@ -69,7 +78,7 @@ function EnterPasswordContent() {
   };
 
   if (!email) {
-    return null; // Don't render anything until email is loaded from params
+    return null;
   }
 
   return (
