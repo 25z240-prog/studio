@@ -54,11 +54,11 @@ export default function StudentLoginPage() {
 
     try {
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      if (signInMethods.length > 0) {
-        // User exists, go to password entry
+      if (signInMethods && signInMethods.length > 0) {
+        // User exists, redirect to enter password page
         router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
       } else {
-        // User does not exist, go to create password
+        // User does not exist, redirect to create password page
         router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
       }
     } catch (error: any) {

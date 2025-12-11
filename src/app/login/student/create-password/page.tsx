@@ -69,7 +69,7 @@ function CreatePasswordContent() {
 
       toast({
           title: "Account Created!",
-          description: "Welcome! You are now logged in.",
+          description: "Welcome! You are now being logged in.",
       });
       router.push('/vote?role=student');
     } catch (error: any) {
@@ -84,6 +84,10 @@ function CreatePasswordContent() {
         setIsSubmitting(false);
     }
   };
+  
+  if (!email) {
+    return null; // Don't render anything until email is loaded from params
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
@@ -94,7 +98,7 @@ function CreatePasswordContent() {
                 <h1 className="font-headline text-xl font-semibold text-foreground">PSG iTech Hostel Mess</h1>
             </div>
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">Create your account</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{email}</p>
+            <p className="mt-2 text-sm text-muted-foreground">Enter a password for {email}</p>
         </div>
         
         <form onSubmit={handleSubmit} className="mt-8">
@@ -129,8 +133,8 @@ function CreatePasswordContent() {
                 <Button variant="link" asChild className="p-0">
                     <Link href="/login/student">Back to email entry</Link>
                 </Button>
-                <Button className="w-36" type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Creating..." : "Create Account"}
+                <Button className="w-40" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Creating Account..." : "Create & Login"}
                 </Button>
             </div>
         </form>

@@ -28,6 +28,7 @@ function EnterPasswordContent() {
     if (emailFromParams) {
       setEmail(emailFromParams);
     } else {
+      // If no email is in the URL, the user should start from the beginning.
       router.push("/login/student");
     }
   }, [searchParams, router]);
@@ -44,24 +45,21 @@ function EnterPasswordContent() {
     }
 
     setIsSubmitting(true);
-    toast({
-        title: "Logging in...",
-        description: "Please wait while we verify your credentials.",
-    });
     
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({
         title: "Login Successful",
-        description: "Welcome back!",
+        description: "Welcome back! Redirecting to the voting page.",
       });
       router.push('/vote?role=student');
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
+      // Handle specific login-related errors
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         description = "The password you entered is incorrect. Please try again.";
       } else if (error.code === 'auth/user-not-found') {
-        description = "No account found with this email. Please go back and try a different email.";
+        description = "No account found with this email. Please go back and create an account first.";
       } else if (error.code === 'auth/too-many-requests') {
         description = "Access to this account has been temporarily disabled due to many failed login attempts.";
       }
@@ -70,6 +68,10 @@ function EnterPasswordContent() {
       setIsSubmitting(false);
     }
   };
+
+  if (!email) {
+    return null; // Don't render anything until email is loaded from params
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
