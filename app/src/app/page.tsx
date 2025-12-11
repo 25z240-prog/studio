@@ -10,8 +10,8 @@ import { User, School } from 'lucide-react';
 export default function RoleSelectionPage() {
   const router = useRouter();
 
-  const handleRoleSelection = () => {
-    router.push('/login');
+  const handleRoleSelection = (role: 'student' | 'management') => {
+    router.push(`/login/${role}`);
   };
 
   return (
@@ -34,14 +34,14 @@ export default function RoleSelectionPage() {
         </CardHeader>
         <CardContent className="grid gap-4">
           <Button
-            onClick={handleRoleSelection}
+            onClick={() => handleRoleSelection('student')}
             className="w-full h-12 text-base"
           >
             <User className="mr-2 h-5 w-5" />
             Student
           </Button>
           <Button
-            onClick={handleRoleSelection}
+            onClick={() => handleRoleSelection('management')}
             variant="secondary"
             className="w-full h-12 text-base"
           >

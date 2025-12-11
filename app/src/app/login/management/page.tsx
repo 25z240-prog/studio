@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   fetchSignInMethodsForEmail,
+  createUserWithEmailAndPassword,
   updateProfile,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -26,22 +26,20 @@ import Link from 'next/link';
 
 const MANAGEMENT_EMAIL = 'management@psgitech.ac.in';
 
-export default function LoginPage() {
+export default function ManagementLoginPage() {
   const router = useRouter();
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(MANAGEMENT_EMAIL);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
+  // Pre-fill email and make it readonly
   useEffect(() => {
-    const storedEmail = localStorage.getItem('user_email');
-    if (storedEmail) {
-      setEmail(storedEmail);
-    }
+    setEmail(MANAGEMENT_EMAIL);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -56,34 +54,19 @@ export default function LoginPage() {
     }
     setIsSubmitting(true);
 
-    const isManagement = email.toLowerCase() === MANAGEMENT_EMAIL;
-    const studentEmailRegex = /^(2[0-5])([a-z]+[0-9]{1,3}|[0-9]{1,3}[a-z]+)@psgitech\.ac\.in$/i;
-    const isStudent = studentEmailRegex.test(email);
-
-    if (!isManagement && !isStudent) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid Email',
-        description: 'Please use a valid PSG iTech student or management email.',
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      localStorage.setItem('user_email', email);
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+      const signInMethods = await fetchSignInMethodsForEmail(auth, MANAGEMENT_EMAIL);
 
       if (signInMethods.length > 0) {
-        // User exists, try to sign in
-        await signInWithEmailAndPassword(auth, email, password);
+        // User exists, sign in
+        await signInWithEmailAndPassword(auth, MANAGEMENT_EMAIL, password);
         toast({
           title: 'Login Successful',
-          description: 'Welcome back! Redirecting...',
+          description: 'Welcome back, Management!',
         });
       } else {
         // New user, create account
-        if (password.length < 6) {
+         if (password.length < 6) {
           toast({
             variant: 'destructive',
             title: 'Password Too Short',
@@ -93,20 +76,17 @@ export default function LoginPage() {
           return;
         }
 
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        const userCredential = await createUserWithEmailAndPassword(auth, MANAGEMENT_EMAIL, password);
         const user = userCredential.user;
-        const name = isManagement ? 'Management' : email.split('@')[0].replace(/[0-9.]/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()).trim();
-        await updateProfile(user, { displayName: name });
+
+        // Set display name for management
+        await updateProfile(user, { displayName: 'Management' });
 
         const userDocRef = doc(firestore, 'users', user.uid);
         const userDocData = {
           id: user.uid,
           email: user.email,
-          name: name,
+          name: 'Management',
           hasPassword: true,
         };
 
@@ -123,15 +103,14 @@ export default function LoginPage() {
             }
              throw docError; // Re-throw to be caught by outer catch
         }
-
+        
         toast({
           title: 'Account Created!',
-          description: 'Welcome! You are now being logged in.',
+          description: 'Welcome, Management! Your account has been set up.',
         });
       }
-      
-      const role = isManagement ? 'management' : 'student';
-      router.push(`/vote?role=${role}`);
+
+      router.push('/vote?role=management');
 
     } catch (error: any) {
       let description = 'An unexpected error occurred. Please try again.';
@@ -139,16 +118,10 @@ export default function LoginPage() {
         switch (error.code) {
           case 'auth/wrong-password':
           case 'auth/invalid-credential':
-            description = 'Incorrect email or password. Please try again.';
-            break;
-          case 'auth/user-not-found':
-            description = 'No account found with this email. A new account will be created if you provide a valid password.';
+            description = 'Incorrect password. Please try again.';
             break;
           case 'auth/too-many-requests':
             description = 'Access to this account has been temporarily disabled due to many failed login attempts.';
-            break;
-          case 'auth/email-already-in-use':
-            description = "This email is already in use. Please try logging in normally.";
             break;
           default:
              if (!error.message.includes('permission-denied')){ 
@@ -166,7 +139,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
-      <div className="flex items-center gap-3 mb-8">
+       <div className="flex items-center gap-3 mb-8">
         <Image
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s"
           width={40}
@@ -179,9 +152,9 @@ export default function LoginPage() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Sign In or Sign Up</CardTitle>
+          <CardTitle className="text-2xl font-headline">Management Sign In</CardTitle>
           <CardDescription>
-            Use your PSG iTech email. A new account will be created for first-time users.
+            Enter the password for the management account.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
@@ -191,11 +164,9 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="student@psgitech.ac.in"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isSubmitting}
+                readOnly
+                className="bg-muted/50"
               />
             </div>
             <div className="grid gap-2 relative">
@@ -224,12 +195,12 @@ export default function LoginPage() {
               </Button>
             </div>
              <p className="px-1 text-xs text-muted-foreground">
-                Use 6 or more characters for your password.
+                Use 6 or more characters for a new password.
             </p>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button className="w-full" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Authenticating...' : 'Continue'}
+              {isSubmitting ? 'Authenticating...' : 'Sign In'}
             </Button>
             <Button variant="link" size="sm" asChild>
                 <Link href="/">Back to role selection</Link>
