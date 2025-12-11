@@ -3,17 +3,12 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, School } from 'lucide-react';
 
 export default function RoleSelectionPage() {
-  const router = useRouter();
-
-  const handleRoleSelection = (role: 'student' | 'management') => {
-    router.push(`/login/${role}`);
-  };
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
       <div className="flex items-center gap-3 mb-8">
@@ -33,21 +28,22 @@ export default function RoleSelectionPage() {
           <CardDescription>Select your role to sign in and continue.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <Button
-            onClick={() => handleRoleSelection('student')}
-            className="w-full h-12 text-base"
-          >
-            <User className="mr-2 h-5 w-5" />
-            Student
-          </Button>
-          <Button
-            onClick={() => handleRoleSelection('management')}
-            variant="secondary"
-            className="w-full h-12 text-base"
-          >
-            <School className="mr-2 h-5 w-5" />
-            Management
-          </Button>
+          <Link href="/login/student" passHref legacyBehavior>
+            <Button asChild className="w-full h-12 text-base">
+              <a>
+                <User className="mr-2 h-5 w-5" />
+                Student
+              </a>
+            </Button>
+          </Link>
+          <Link href="/login/management" passHref legacyBehavior>
+            <Button asChild variant="secondary" className="w-full h-12 text-base">
+               <a>
+                <School className="mr-2 h-5 w-5" />
+                Management
+              </a>
+            </Button>
+          </Link>
         </CardContent>
       </Card>
       <footer className="py-6 md:px-8 md:py-0 mt-8">
