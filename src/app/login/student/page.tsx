@@ -71,7 +71,6 @@ export default function StudentLoginPage() {
       });
       setIsSubmitting(false);
     }
-    // No need to set isSubmitting to false on successful navigation.
   };
 
   return (
