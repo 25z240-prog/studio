@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ThumbsUp, Trash2 } from "lucide-react";
 import type { MenuItem } from "@/lib/types";
-import { useFirebase, useUser } from "@/firebase";
+import { useFirebase, useUser, errorEmitter, FirestorePermissionError } from "@/firebase";
 import { doc, runTransaction, getDoc, collection, query, where } from 'firebase/firestore';
 import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
@@ -54,19 +54,18 @@ export function MenuItemCard({ item, role }: MenuItemCardProps) {
 
     const itemRef = doc(firestore, 'menuItems', item.id);
     const voteRef = doc(firestore, 'userVotes', `${user.uid}_${item.id}`);
+    const voteData = { userId: user.uid, menuItemId: item.id, votedAt: new Date() };
 
     try {
       await runTransaction(firestore, async (transaction) => {
         const voteDoc = await transaction.get(voteRef);
         if (voteDoc.exists()) {
-          // Already voted, do nothing in the transaction.
-          // The UI is already updated via `hasVoted` state.
           toast({
             variant: "destructive",
             title: "Already Voted",
             description: "You have already voted for this item.",
           });
-          return;
+          return; // Stop the transaction
         }
 
         const itemDoc = await transaction.get(itemRef);
@@ -76,7 +75,7 @@ export function MenuItemCard({ item, role }: MenuItemCardProps) {
 
         const newVoteCount = (itemDoc.data().votes || 0) + 1;
         transaction.update(itemRef, { votes: newVoteCount });
-        transaction.set(voteRef, { userId: user.uid, menuItemId: item.id, votedAt: new Date() });
+        transaction.set(voteRef, voteData);
       });
 
       setHasVoted(true); // Update UI to reflect the vote
@@ -86,12 +85,22 @@ export function MenuItemCard({ item, role }: MenuItemCardProps) {
       });
 
     } catch (error: any) {
-      console.error("Voting failed:", error);
-      toast({
-        variant: "destructive",
-        title: "Vote Failed",
-        description: error.message || "Could not record your vote. Please try again.",
-      });
+      // This is where we catch permission errors from the transaction
+      if (error.code === 'permission-denied') {
+        const permissionError = new FirestorePermissionError({
+          path: voteRef.path, // The vote creation is the most likely failure point
+          operation: 'create',
+          requestResourceData: voteData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      } else {
+         console.error("Voting failed:", error);
+         toast({
+           variant: "destructive",
+           title: "Vote Failed",
+           description: error.message || "Could not record your vote. Please try again.",
+         });
+      }
     } finally {
       setIsVoting(false);
     }
@@ -100,15 +109,17 @@ export function MenuItemCard({ item, role }: MenuItemCardProps) {
   const handleDelete = async () => {
     if (!firestore || !item.id) return;
     setIsDeleting(true);
-
+    
     try {
         const itemRef = doc(firestore, 'menuItems', item.id);
-        await deleteDocumentNonBlocking(itemRef);
+        // Use the non-blocking delete function which has built-in contextual error handling
+        deleteDocumentNonBlocking(itemRef);
         toast({
             title: "Item Deleted",
             description: `"${item.title}" has been removed from the menu.`,
         });
     } catch (error: any) {
+        // This catch is a fallback, but the non-blocking function will emit the detailed error
         toast({
             variant: "destructive",
             title: "Deletion Failed",
@@ -116,7 +127,7 @@ export function MenuItemCard({ item, role }: MenuItemCardProps) {
         });
         setIsDeleting(false);
     }
-    // No need to set isDeleting to false here, as the component will unmount on success.
+    // The component will unmount on success, so no need to setIsDeleting(false) in the success path.
   };
   
   const currentVotes = item.votes || 0;

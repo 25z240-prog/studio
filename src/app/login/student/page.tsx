@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth, useFirestore } from "@/firebase";
+import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from "@/firebase";
 import {
   fetchSignInMethodsForEmail,
   signInWithEmailAndPassword,
@@ -140,18 +140,26 @@ export default function StudentLoginPage() {
       return;
     }
     setIsSubmitting(true);
+    let userDocData: any;
+    let userDocRef: any;
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       const name = email.split('@')[0].replace(/[0-9.]/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()).trim();
+      
       await updateProfile(user, { displayName: name });
-      const userDocRef = doc(firestore, "users", user.uid);
-      await setDoc(userDocRef, {
+      
+      userDocRef = doc(firestore, "users", user.uid);
+      userDocData = {
           id: user.uid,
           email: user.email,
           name: name,
           hasPassword: true,
-      });
+      };
+
+      await setDoc(userDocRef, userDocData);
+
       toast({ title: "Account Created!", description: "Welcome! You are now being logged in." });
       setShowCreatePasswordDialog(false);
       router.push('/vote?role=student');
@@ -161,7 +169,15 @@ export default function StudentLoginPage() {
          toast({ variant: "destructive", title: "Account Exists", description: "An account with this email already exists. Please try logging in." });
          setShowCreatePasswordDialog(false); // Close create dialog
          setShowPasswordDialog(true); // Open login dialog
-      } else {
+      } else if (error.code === 'permission-denied') {
+        const permissionError = new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: 'create',
+            requestResourceData: userDocData
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      }
+      else {
          toast({ variant: "destructive", title: "Registration Failed", description: error.message || "An unexpected error occurred." });
       }
     } finally {
@@ -275,7 +291,7 @@ export default function StudentLoginPage() {
             <DialogHeader>
               <DialogTitle className="font-headline text-2xl">Enter password</DialogTitle>
               <DialogDescription>
-                Enter a password for <span className="font-medium text-foreground">{email}</span>.
+                A password is required for <span className="font-medium text-foreground">{email}</span>.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateAccountSubmit}>
