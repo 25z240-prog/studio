@@ -224,8 +224,13 @@ function VotePageContent() {
                 ? "This week's official menu has been finalized." 
                 : (role === 'student' ? 'Vote for your favorite dishes!' : 'Manage the weekly menu.')}
             </p>
+            {role === 'student' && !isFinalized && (
+                <p className="mx-auto max-w-[700px] text-sky-400 text-sm mt-2">
+                  Note: Voting closes and the menu is finalized automatically every Monday at 12:00 AM.
+                </p>
+            )}
              {isFinalized && role === 'management' && (
-                <p className="mx-auto max-w-[700px] text-amber-400 md:text-xl mt-4">
+                <p className="mxauto max-w-[700px] text-amber-400 md:text-xl mt-4">
                   The menu has been finalized. To make changes, reset the menu state.
                 </p>
             )}
@@ -284,5 +289,3 @@ export default function VotePage() {
     </Suspense>
   );
 }
-
-    
