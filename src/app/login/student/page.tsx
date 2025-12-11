@@ -121,7 +121,6 @@ export default function StudentLoginPage() {
                 uid: user.uid,
                 email: user.email,
                 name: name,
-                role: 'student',
                 hasPassword: true
             });
 
