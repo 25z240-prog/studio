@@ -167,7 +167,7 @@ function VotePageContent() {
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-card/50 backdrop-blur-lg">
         <div className="container flex h-auto min-h-16 flex-wrap items-center justify-end gap-x-4 gap-y-2 py-2 md:flex-nowrap">
-          <Link href="/login" className="mr-auto flex items-center gap-3">
+          <Link href={`/vote?role=${role}`} className="mr-auto flex items-center gap-3">
              <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={32} height={32} alt="PSG iTech Logo" />
             <h1 className="text-base sm:text-xl md:text-2xl font-bold font-headline text-foreground whitespace-nowrap">
               PSG iTech Hostel Mess
