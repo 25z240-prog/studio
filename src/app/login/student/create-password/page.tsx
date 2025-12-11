@@ -80,8 +80,7 @@ function CreatePasswordContent() {
           description = "The password is too weak. Please use a stronger password.";
       }
       toast({ variant: "destructive", title: "Registration Failed", description });
-    } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
   
