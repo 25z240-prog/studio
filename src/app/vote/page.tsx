@@ -17,6 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuItemCard } from "@/components/menu-item-card";
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
+import { FinalizeMenuDialog } from "@/components/finalize-menu-dialog";
 
 const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const categories: MenuCategory[] = ['breakfast', 'lunch', 'snack', 'dinner'];
@@ -106,7 +107,12 @@ function VotePageContent() {
             </h1>
           </Link>
           <div className="flex items-center gap-4">
-            {role === 'management' && <AddMenuItemDialog />}
+            {role === 'management' && (
+              <>
+                <FinalizeMenuDialog />
+                <AddMenuItemDialog />
+              </>
+            )}
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
