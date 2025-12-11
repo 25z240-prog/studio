@@ -93,7 +93,7 @@ export default function ManagementLoginPage() {
               {isSubmitting ? "Logging in..." : "Login"}
             </Button>
              <Button variant="link" size="sm" asChild>
-                <Link href="/login">Back to role selection</Link>
+                <Link href="/">Back to role selection</Link>
             </Button>
           </CardFooter>
         </form>

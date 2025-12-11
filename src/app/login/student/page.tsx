@@ -232,7 +232,7 @@ export default function StudentLoginPage() {
 
               <div className="mt-6 flex items-center justify-between">
                   <Button variant="link" asChild className="p-0">
-                      <Link href="/login">Back to role selection</Link>
+                      <Link href="/">Back to role selection</Link>
                   </Button>
                   <Button type="submit" disabled={isSubmitting} className="w-24">
                       {isSubmitting ? "Checking..." : "Next"}

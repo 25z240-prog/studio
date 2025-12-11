@@ -51,7 +51,7 @@ function VotePageContent() {
 
   useEffect(() => {
     if (!isUserLoading && !user) {
-      router.push('/login');
+      router.push('/');
     }
   }, [user, isUserLoading, router]);
 
@@ -93,7 +93,7 @@ function VotePageContent() {
 
   const handleLogout = () => {
     auth?.signOut();
-    router.push('/login');
+    router.push('/');
   };
 
   const groupedMenuItems = useMemo(() => {
