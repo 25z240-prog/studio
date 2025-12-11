@@ -16,29 +16,36 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useFirestore } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 export function FinalizeMenuDialog() {
   const [isFinalizing, setIsFinalizing] = useState(false);
   const { toast } = useToast();
+  const firestore = useFirestore();
 
   const handleFinalize = async () => {
+    if (!firestore) {
+      toast({ variant: "destructive", title: "Error", description: "Firestore not available." });
+      return;
+    }
+
     setIsFinalizing(true);
-    // This is a placeholder for the actual finalization logic.
-    // In a real app, this would trigger a backend process.
+    
     try {
-      // Simulate an API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const menuStateRef = doc(firestore, 'menuState', 'weekly');
+      await setDoc(menuStateRef, { isFinalized: true }, { merge: true });
       
       toast({
-        title: "Menu Finalized (Simulated)",
-        description: "The menu for the week has been locked in.",
+        title: "Menu Finalized",
+        description: "The menu for the week has been locked in and is now visible to students.",
       });
 
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Finalization Failed",
-        description: "Could not finalize the menu. Please try again.",
+        description: error.message || "Could not finalize the menu. Please try again.",
       });
     } finally {
       setIsFinalizing(false);
@@ -70,3 +77,5 @@ export function FinalizeMenuDialog() {
     </AlertDialog>
   );
 }
+
+    

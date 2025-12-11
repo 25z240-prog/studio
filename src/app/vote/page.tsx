@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, Suspense, useMemo } from "react";
+import { useEffect, Suspense, useMemo, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
 import { LogOut, UserCircle } from "lucide-react";
@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useAuth, useFirebase, useCollection, useMemoFirebase } from "@/firebase";
+import { useAuth, useFirebase, useCollection, useMemoFirebase, useDoc } from "@/firebase";
 import { AddMenuItemDialog } from "@/components/add-menu-item-dialog";
-import { collection } from 'firebase/firestore';
-import { DayOfWeek, MenuCategory, type MenuItem } from "@/lib/types";
+import { collection, doc } from 'firebase/firestore';
+import { DayOfWeek, MenuCategory, type MenuItem, type MenuState } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuItemCard } from "@/components/menu-item-card";
@@ -36,6 +36,14 @@ function VotePageContent() {
   }, [firestore, user]);
   const { data: menuItems, isLoading: isLoadingMenuItems } = useCollection<MenuItem>(menuItemsRef);
 
+  const menuStateRef = useMemoFirebase(() => {
+      if (!firestore) return null;
+      return doc(firestore, 'menuState', 'weekly');
+  }, [firestore]);
+  const { data: menuState, isLoading: isLoadingMenuState } = useDoc<MenuState>(menuStateRef);
+
+  const isFinalized = menuState?.isFinalized || false;
+
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/login');
@@ -49,7 +57,7 @@ function VotePageContent() {
 
   const groupedMenuItems = useMemo(() => {
     if (!menuItems) return {};
-    return menuItems.reduce((acc, item) => {
+    const grouped = menuItems.reduce((acc, item) => {
       const day = item.day;
       if (!acc[day]) {
         acc[day] = [];
@@ -57,7 +65,24 @@ function VotePageContent() {
       acc[day].push(item);
       return acc;
     }, {} as { [key in DayOfWeek]?: MenuItem[] });
-  }, [menuItems]);
+
+    if (isFinalized && role === 'student') {
+        const finalMenu: { [key in DayOfWeek]?: MenuItem[] } = {};
+        for (const day in grouped) {
+            finalMenu[day as DayOfWeek] = [];
+            for (const category of categories) {
+                const categoryItems = grouped[day as DayOfWeek]?.filter(item => item.category === category);
+                if (categoryItems && categoryItems.length > 0) {
+                    const topItem = categoryItems.sort((a, b) => (b.votes || 0) - (a.votes || 0))[0];
+                    finalMenu[day as DayOfWeek]?.push(topItem);
+                }
+            }
+        }
+        return finalMenu;
+    }
+
+    return grouped;
+  }, [menuItems, isFinalized, role]);
 
   const defaultDay = useMemo(() => {
     const todayIndex = new Date().getDay(); // Sunday: 0, Monday: 1, etc.
@@ -66,17 +91,17 @@ function VotePageContent() {
   }, []);
 
 
-  if (isUserLoading || isLoadingMenuItems) {
+  if (isUserLoading || isLoadingMenuItems || isLoadingMenuState) {
     return <div className="flex min-h-screen w-full flex-col items-center justify-center"><p>Loading...</p></div>;
   }
   
   const renderCategory = (day: DayOfWeek, category: MenuCategory) => {
-    const filteredItems = groupedMenuItems[day]
+    let items = groupedMenuItems[day]
       ?.filter(item => item.category === category);
   
-    const items = role === 'management'
-      ? filteredItems?.sort((a, b) => (b.votes || 0) - (a.votes || 0))
-      : filteredItems;
+    if (role === 'management' && items) {
+        items = items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+    }
   
     if (!items || items.length === 0) {
       return <p className="text-muted-foreground text-center py-8">No items for {category} on {day}.</p>;
@@ -90,6 +115,7 @@ function VotePageContent() {
             item={item} 
             role={role as 'student' | 'management'} 
             rank={role === 'management' ? index + 1 : undefined}
+            isFinalized={isFinalized && role === 'student'}
           />
         ))}
       </div>
@@ -107,7 +133,7 @@ function VotePageContent() {
             </h1>
           </Link>
           <div className="flex items-center gap-4">
-            {role === 'management' && (
+            {role === 'management' && !isFinalized && (
               <>
                 <FinalizeMenuDialog />
                 <AddMenuItemDialog />
@@ -147,7 +173,9 @@ function VotePageContent() {
               Weekly Mess Menu
             </h2>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
-              Here's what's cooking this week. {role === 'student' ? 'Vote for your favorite dishes!' : 'Manage the weekly menu.'}
+              {isFinalized && role === 'student' 
+                ? "This week's official menu has been finalized." 
+                : (role === 'student' ? 'Vote for your favorite dishes!' : 'Manage the weekly menu.')}
             </p>
           </div>
 
@@ -178,7 +206,7 @@ function VotePageContent() {
           ) : (
              <div className="text-center py-12">
               <p className="text-muted-foreground text-lg">No menu items have been added yet.</p>
-               {role === 'management' && (
+               {role === 'management' && !isFinalized && (
                 <p className="text-muted-foreground mt-2">Click "Add Menu Item" in the header to get started.</p>
               )}
             </div>
@@ -204,3 +232,5 @@ export default function VotePage() {
     </Suspense>
   );
 }
+
+    

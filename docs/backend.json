@@ -123,6 +123,20 @@
         "menuItemId",
         "votedAt"
       ]
+    },
+    "MenuState": {
+      "title": "Menu State",
+      "type": "object",
+      "description": "Stores the state of the weekly menu, e.g., whether it is finalized.",
+      "properties": {
+        "isFinalized": {
+          "type": "boolean",
+          "description": "Indicates if the menu for the week has been finalized."
+        }
+      },
+      "required": [
+        "isFinalized"
+      ]
     }
   },
   "auth": {
@@ -180,8 +194,26 @@
             }
           ]
         }
+      },
+      {
+        "path": "/menuState/{stateId}",
+        "definition": {
+          "entityName": "MenuState",
+          "schema": {
+            "$ref": "#/backend/entities/MenuState"
+          },
+          "description": "Stores the state of the menu. 'weekly' is used as the document ID.",
+          "params": [
+            {
+              "name": "stateId",
+              "description": "The identifier for the menu state, e.g., 'weekly'."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support a hostel menu voting application. It includes a 'users' collection for profiles, a 'menuItems' collection for votable items, and a 'userVotes' collection to enforce the one-vote-per-user-per-item rule. This structure separates user data, application data, and voting records for clear management and security."
+    "reasoning": "The Firestore structure is designed to support a hostel menu voting application. It includes a 'users' collection for profiles, a 'menuItems' collection for votable items, and a 'userVotes' collection to enforce the one-vote-per-user-per-item rule. The 'menuState' collection manages the lifecycle of the menu, such as finalization. This structure separates user data, application data, voting records, and state management for clear organization and security."
   }
 }
+
+    

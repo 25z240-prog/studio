@@ -17,3 +17,9 @@ export type MenuItem = {
   dietaryInfo: DietaryInfo;
   votes: number;
 };
+
+export type MenuState = {
+  isFinalized: boolean;
+};
+
+    

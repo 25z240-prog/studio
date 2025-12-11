@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ThumbsUp, Trash2 } from "lucide-react";
+import { ThumbsUp, Trash2, CheckCheck } from "lucide-react";
 import type { MenuItem } from "@/lib/types";
 import { useFirebase, useUser, errorEmitter, FirestorePermissionError } from "@/firebase";
 import { doc, runTransaction, getDoc, collection, query, where } from 'firebase/firestore';
@@ -28,9 +28,10 @@ interface MenuItemCardProps {
   item: MenuItem;
   role: 'student' | 'management';
   rank?: number;
+  isFinalized?: boolean;
 }
 
-export function MenuItemCard({ item, role, rank }: MenuItemCardProps) {
+export function MenuItemCard({ item, role, rank, isFinalized = false }: MenuItemCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
@@ -158,6 +159,15 @@ export function MenuItemCard({ item, role, rank }: MenuItemCardProps) {
             #{rank}
           </Badge>
         )}
+         {isFinalized && (
+            <Badge
+                variant="default"
+                className="absolute top-2 right-2 text-base font-bold backdrop-blur-sm bg-green-600/90 text-white border-green-700/80"
+            >
+                <CheckCheck className="mr-2 h-5 w-5" />
+                Finalized
+            </Badge>
+        )}
       </CardHeader>
       <CardContent className="flex-1 p-4">
         <CardTitle className="text-lg font-headline mb-2">{item.title}</CardTitle>
@@ -171,7 +181,7 @@ export function MenuItemCard({ item, role, rank }: MenuItemCardProps) {
         </Badge>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex gap-2 items-center">
-        {role === 'student' && (
+        {role === 'student' && !isFinalized && (
           <Button onClick={handleVote} className="w-full" disabled={isVoting || hasVoted}>
             <ThumbsUp className="mr-2 h-4 w-4" />
             <span className="flex-1">{hasVoted ? 'Voted' : 'Vote'}</span>
@@ -181,6 +191,12 @@ export function MenuItemCard({ item, role, rank }: MenuItemCardProps) {
                 </Badge>
               )}
           </Button>
+        )}
+         {role === 'student' && isFinalized && (
+             <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground gap-2">
+                <ThumbsUp className="h-4 w-4 text-primary" />
+                <span className="font-semibold text-foreground">{currentVotes} {currentVotes === 1 ? 'Vote' : 'Votes'}</span>
+            </div>
         )}
         {role === 'management' && (
           <>
@@ -221,3 +237,5 @@ export function MenuItemCard({ item, role, rank }: MenuItemCardProps) {
     </Card>
   );
 }
+
+    
