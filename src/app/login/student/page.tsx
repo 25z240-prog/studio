@@ -54,16 +54,19 @@ export default function StudentLoginPage() {
 
     try {
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      if (signInMethods && signInMethods.length > 0) {
+      if (signInMethods.length > 0) {
+        // User exists, go to password entry
         router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
       } else {
+        // User does not exist, go to create password
         router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
       }
     } catch (error: any) {
+        console.error("Error checking sign-in methods:", error);
         toast({
             variant: "destructive",
             title: "Authentication Error",
-            description: "Could not verify email. Please try again.",
+            description: "Could not verify your email at this time. Please try again later.",
         });
         setIsSubmitting(false);
     }
