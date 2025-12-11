@@ -269,7 +269,7 @@ export default function StudentLoginPage() {
       <Dialog open={showCreatePasswordDialog} onOpenChange={closeCreatePasswordDialog}>
         <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-headline text-2xl">Create your account</DialogTitle>
+              <DialogTitle className="font-headline text-2xl">Enter password</DialogTitle>
               <DialogDescription>
                 Enter a password for <span className="font-medium text-foreground">{email}</span> to create your account.
               </DialogDescription>
