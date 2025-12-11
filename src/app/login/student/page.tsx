@@ -49,6 +49,7 @@ export default function StudentLoginPage() {
     }
 
     setIsSubmitting(true);
+    
     try {
       localStorage.setItem("student_email", email);
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
@@ -67,7 +68,7 @@ export default function StudentLoginPage() {
         title: "Authentication Error",
         description: "Could not verify your email at this time. Please try again.",
       });
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Only set to false on error, success will navigate away
     }
   };
 
