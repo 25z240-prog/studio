@@ -10,13 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { useFirestore } from "@/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { useAuth } from "@/firebase";
+import { fetchSignInMethodsForEmail } from "firebase/auth";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function StudentLoginPage() {
   const router = useRouter();
-  const firestore = useFirestore();
+  const auth = useAuth();
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
@@ -42,11 +42,11 @@ export default function StudentLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firestore) {
+    if (!auth) {
         toast({
             variant: "destructive",
             title: "Initialization Error",
-            description: "Database service is not ready. Please wait a moment and try again.",
+            description: "Authentication service is not ready. Please wait a moment and try again.",
         });
         return;
     }
@@ -65,9 +65,7 @@ export default function StudentLoginPage() {
     }
 
     try {
-      const usersRef = collection(firestore, "users");
-      const q = query(usersRef, where("email", "==", email));
-      const querySnapshot = await getDocs(q);
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
 
       if (rememberMe) {
         localStorage.setItem("student_email", email);
@@ -75,19 +73,11 @@ export default function StudentLoginPage() {
         localStorage.removeItem("student_email");
       }
       
-      let userExists = false;
-      if (!querySnapshot.empty) {
-        const userDoc = querySnapshot.docs[0].data();
-        if (userDoc.hasPassword) {
-          userExists = true;
-        }
-      }
-
-      if (userExists) {
-        // User exists and has a password, go to enter password page
+      if (signInMethods.length > 0) {
+        // User exists, go to enter password page
         router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
       } else {
-        // New user or user without a password, go to create password page
+        // New user, go to create password page
         router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
       }
 
