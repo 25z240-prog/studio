@@ -52,6 +52,7 @@ export default function StudentLoginPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setPassword(""); // Reset password field
+    setShowPassword(false); // Reset password visibility
     
     if (!auth) {
       toast({
@@ -109,6 +110,7 @@ export default function StudentLoginPage() {
             title: "Login Successful",
             description: "Welcome back! Redirecting to the voting page.",
         });
+        setShowPasswordDialog(false);
         router.push('/vote?role=student');
     } catch (error: any) {
         let description = "An unexpected error occurred. Please try again.";
@@ -147,13 +149,33 @@ export default function StudentLoginPage() {
           hasPassword: true,
       });
       toast({ title: "Account Created!", description: "Welcome! You are now being logged in." });
+      setShowCreatePasswordDialog(false);
       router.push('/vote?role=student');
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Registration Failed", description: error.message || "An unexpected error occurred." });
+      // This error should not happen with the new flow, but as a safeguard:
+      if (error.code === 'auth/email-already-in-use') {
+         toast({ variant: "destructive", title: "Account Exists", description: "An account with this email already exists. Please try logging in." });
+         setShowCreatePasswordDialog(false); // Close create dialog
+         setShowPasswordDialog(true); // Open login dialog
+      } else {
+         toast({ variant: "destructive", title: "Registration Failed", description: error.message || "An unexpected error occurred." });
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+  
+  const closePasswordDialog = () => {
+    setShowPasswordDialog(false);
+    setPassword("");
+    setShowPassword(false);
+  }
+
+  const closeCreatePasswordDialog = () => {
+    setShowCreatePasswordDialog(false);
+    setPassword("");
+    setShowPassword(false);
+  }
 
   return (
     <>
@@ -198,8 +220,8 @@ export default function StudentLoginPage() {
         </div>
       </div>
 
-      {/* Enter Password Dialog */}
-      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+      {/* Enter Password Dialog for Existing Users */}
+      <Dialog open={showPasswordDialog} onOpenChange={closePasswordDialog}>
           <DialogContent className="sm:max-w-md">
                <DialogHeader>
                   <DialogTitle className="font-headline text-2xl">Welcome back</DialogTitle>
@@ -243,8 +265,8 @@ export default function StudentLoginPage() {
           </DialogContent>
       </Dialog>
 
-      {/* Create Password Dialog */}
-      <Dialog open={showCreatePasswordDialog} onOpenChange={setShowCreatePasswordDialog}>
+      {/* Create Password Dialog for New Users */}
+      <Dialog open={showCreatePasswordDialog} onOpenChange={closeCreatePasswordDialog}>
         <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="font-headline text-2xl">Create your account</DialogTitle>
