@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuItemCard } from "@/components/menu-item-card";
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { FinalizeMenuDialog } from "@/components/finalize-menu-dialog";
+import { ResetMenuDialog } from "@/components/reset-menu-dialog";
 
 const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const categories: MenuCategory[] = ['breakfast', 'lunch', 'snack', 'dinner'];
@@ -133,10 +134,16 @@ function VotePageContent() {
             </h1>
           </Link>
           <div className="flex items-center gap-4">
-            {role === 'management' && !isFinalized && (
+             {role === 'management' && (
               <>
-                <FinalizeMenuDialog />
-                <AddMenuItemDialog />
+                {isFinalized ? (
+                  <ResetMenuDialog />
+                ) : (
+                  <>
+                    <FinalizeMenuDialog />
+                    <AddMenuItemDialog />
+                  </>
+                )}
               </>
             )}
              <DropdownMenu>
@@ -179,7 +186,7 @@ function VotePageContent() {
             </p>
              {isFinalized && role === 'management' && (
                 <p className="mx-auto max-w-[700px] text-amber-400 md:text-xl mt-4">
-                  The menu has been finalized. To make changes, you must reset the menu state in the database.
+                  The menu has been finalized. To make changes, reset the menu state.
                 </p>
             )}
           </div>
@@ -237,5 +244,3 @@ export default function VotePage() {
     </Suspense>
   );
 }
-
-    
