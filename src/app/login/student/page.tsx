@@ -80,6 +80,10 @@ export default function StudentLoginPage() {
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
       
       if (signInMethods.length > 0) {
+        toast({
+            title: "Account Found",
+            description: "Welcome back! Please enter your password to continue.",
+        });
         setShowPasswordDialog(true);
       } else {
         setShowCreatePasswordDialog(true);
