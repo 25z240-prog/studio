@@ -64,7 +64,7 @@ export function FinalizeMenuDialog() {
         <AlertDialogHeader>
           <AlertDialogTitle>Finalize the Weekly Menu?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action will lock the menu for the upcoming week based on the current votes. This process cannot be undone. Are you sure you want to proceed?
+            This action will lock the menu for the upcoming week based on the current votes. Are you sure you want to proceed?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
