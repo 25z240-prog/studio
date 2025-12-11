@@ -20,9 +20,10 @@ import {
 import { ThumbsUp, Trash2, CheckCheck } from "lucide-react";
 import type { MenuItem } from "@/lib/types";
 import { useFirebase, useUser, errorEmitter, FirestorePermissionError } from "@/firebase";
-import { doc, runTransaction, getDoc, collection, query, where } from 'firebase/firestore';
+import { doc, runTransaction, getDoc } from 'firebase/firestore';
 import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -142,100 +143,100 @@ export function MenuItemCard({ item, role, rank, isFinalized = false }: MenuItem
   };
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-      <CardHeader className="p-0 relative">
-        <Image
-          src={item.imageUrl}
-          alt={item.title}
-          data-ai-hint={item.imageHint}
-          width={600}
-          height={400}
-          className="aspect-video w-full object-cover"
-        />
-         {role === 'management' && rank && (
-          <Badge
-            className={`absolute top-2 left-2 text-base font-bold backdrop-blur-sm ${getRankColor(rank)}`}
-          >
-            #{rank}
-          </Badge>
-        )}
-         {isFinalized && role === 'student' && (
+    <motion.div whileHover={{ scale: 1.03, y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
+      <Card className="flex flex-col overflow-hidden h-full">
+        <CardHeader className="p-0 relative">
+          <Image
+            src={item.imageUrl}
+            alt={item.title}
+            data-ai-hint={item.imageHint}
+            width={600}
+            height={400}
+            className="aspect-video w-full object-cover"
+          />
+           {role === 'management' && rank && (
             <Badge
-                variant="default"
-                className="absolute top-2 right-2 text-base font-bold backdrop-blur-sm bg-green-600/90 text-white border-green-700/80"
+              className={`absolute top-2 left-2 text-base font-bold backdrop-blur-sm ${getRankColor(rank)}`}
             >
-                <CheckCheck className="mr-2 h-5 w-5" />
-                Finalized
+              #{rank}
             </Badge>
-        )}
-      </CardHeader>
-      <CardContent className="flex-1 p-4">
-        <CardTitle className="text-lg font-headline mb-2">{item.title}</CardTitle>
-        {item.ingredients && (
-            <CardDescription className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                Ingredients: {item.ingredients}
-            </CardDescription>
-        )}
-        <Badge variant={item.dietaryInfo === 'veg' ? 'secondary' : 'destructive'}>
-          {item.dietaryInfo.toUpperCase()}
-        </Badge>
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex gap-2 items-center">
-        {role === 'student' && !isFinalized && (
-          <Button onClick={handleVote} className="w-full" disabled={isVoting || hasVoted}>
-            <ThumbsUp className="mr-2 h-4 w-4" />
-            <span className="flex-1">{hasVoted ? 'Voted' : 'Vote'}</span>
-             {currentVotes > 0 && (
-                <Badge variant="outline" className="ml-2 bg-background/50 backdrop-blur-sm">
-                  {currentVotes}
-                </Badge>
-              )}
-          </Button>
-        )}
-         {role === 'student' && isFinalized && (
-             <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground gap-2">
-                <ThumbsUp className="h-4 w-4 text-primary" />
-                <span className="font-semibold text-foreground">{currentVotes} {currentVotes === 1 ? 'Vote' : 'Votes'}</span>
-            </div>
-        )}
-        {role === 'management' && (
-          <>
-             <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground gap-2">
-                <ThumbsUp className="h-4 w-4" />
-                <span>{currentVotes} {currentVotes === 1 ? 'Vote' : 'Votes'}</span>
-            </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="icon" disabled={isDeleting}>
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete Item</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the menu item
-                    <span className="font-semibold text-foreground"> "{item.title}"</span>.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    {isDeleting ? "Deleting..." : "Delete"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </>
-        )}
-      </CardFooter>
-    </Card>
+          )}
+           {isFinalized && role === 'student' && (
+              <Badge
+                  variant="default"
+                  className="absolute top-2 right-2 text-base font-bold backdrop-blur-sm bg-green-600/90 text-white border-green-700/80"
+              >
+                  <CheckCheck className="mr-2 h-5 w-5" />
+                  Finalized
+              </Badge>
+          )}
+        </CardHeader>
+        <CardContent className="flex-1 p-4">
+          <CardTitle className="text-lg font-headline mb-2">{item.title}</CardTitle>
+          {item.ingredients && (
+              <CardDescription className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                  Ingredients: {item.ingredients}
+              </CardDescription>
+          )}
+          <Badge variant={item.dietaryInfo === 'veg' ? 'secondary' : 'destructive'}>
+            {item.dietaryInfo.toUpperCase()}
+          </Badge>
+        </CardContent>
+        <CardFooter className="p-4 pt-0 flex gap-2 items-center">
+          {role === 'student' && !isFinalized && (
+            <Button onClick={handleVote} className="w-full" disabled={isVoting || hasVoted}>
+              <ThumbsUp className="mr-2 h-4 w-4" />
+              <span className="flex-1">{hasVoted ? 'Voted' : 'Vote'}</span>
+               {currentVotes > 0 && (
+                  <Badge variant="outline" className="ml-2 bg-background/50 backdrop-blur-sm">
+                    {currentVotes}
+                  </Badge>
+                )}
+            </Button>
+          )}
+           {role === 'student' && isFinalized && (
+               <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground gap-2">
+                  <ThumbsUp className="h-4 w-4 text-primary" />
+                  <span className="font-semibold text-foreground">{currentVotes} {currentVotes === 1 ? 'Vote' : 'Votes'}</span>
+              </div>
+          )}
+          {role === 'management' && (
+            <>
+               <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground gap-2">
+                  <ThumbsUp className="h-4 w-4" />
+                  <span>{currentVotes} {currentVotes === 1 ? 'Vote' : 'Votes'}</span>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="icon" disabled={isDeleting}>
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete Item</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete the menu item
+                      <span className="font-semibold text-foreground"> "{item.title}"</span>.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="bg-destructive hover:bg-destructive/90"
+                    >
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          )}
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 }
-
-    

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -25,6 +26,17 @@ import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
 const MANAGEMENT_EMAIL = 'management@psgitech.ac.in';
+=======
+
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shield, User } from "lucide-react";
+import { motion } from "framer-motion";
+>>>>>>> new_DT_Food_Menu
 
 export default function LoginPage() {
   const router = useRouter();
@@ -165,6 +177,7 @@ export default function LoginPage() {
   };
 
   return (
+<<<<<<< HEAD
     <div className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
       <div className="flex items-center gap-3 mb-8">
         <Image
@@ -178,6 +191,20 @@ export default function LoginPage() {
         </h1>
       </div>
       <Card className="w-full max-w-sm">
+=======
+    <motion.div 
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex min-h-screen flex-col items-center justify-center bg-transparent p-4">
+       <div className="flex items-center gap-3 mb-8">
+            <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Y3hSktYhqo6-09Gyrt3YmhIBpJesKIdIxw&s" width={40} height={40} alt="PSG iTech Logo" />
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-headline text-foreground whitespace-nowrap">
+              PSG iTech Hostel Mess
+            </h1>
+        </div>
+      <Card className="w-full max-w-md">
+>>>>>>> new_DT_Food_Menu
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-headline">Sign In or Sign Up</CardTitle>
           <CardDescription>
@@ -237,6 +264,17 @@ export default function LoginPage() {
           </CardFooter>
         </form>
       </Card>
+<<<<<<< HEAD
     </div>
+=======
+      <footer className="py-6 md:px-8 md:py-0 mt-8">
+        <div className="container flex flex-col items-center justify-center gap-4 md:h-24 md:flex-row">
+          <p className="text-center text-sm leading-loose text-muted-foreground">
+            Built for the PSG iTech hostel community. All rights reserved.
+          </p>
+        </div>
+      </footer>
+    </motion.div>
+>>>>>>> new_DT_Food_Menu
   );
 }
