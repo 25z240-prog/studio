@@ -207,7 +207,9 @@ export default function StudentLoginPage() {
                   <h1 className="font-headline text-xl font-semibold text-foreground">PSG iTech Hostel Mess</h1>
               </div>
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">Sign in</h2>
-              <p className="mt-2 text-sm text-muted-foreground">to continue to Hostel Mess Voting</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                  to continue to Hostel Mess Voting
+              </p>
           </div>
           
           <form onSubmit={handleEmailSubmit}>
@@ -289,7 +291,7 @@ export default function StudentLoginPage() {
       <Dialog open={showCreatePasswordDialog} onOpenChange={closeCreatePasswordDialog}>
         <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-headline text-2xl">Enter password</DialogTitle>
+              <DialogTitle className="font-headline text-2xl">Enter or create password</DialogTitle>
               <DialogDescription>
                 A password is required for <span className="font-medium text-foreground">{email}</span>.
               </DialogDescription>
