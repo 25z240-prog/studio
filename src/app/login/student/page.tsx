@@ -28,6 +28,7 @@ export default function StudentLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     if (!auth) {
       toast({
@@ -35,6 +36,7 @@ export default function StudentLoginPage() {
         title: "Initialization Error",
         description: "Authentication service is not ready. Please try again.",
       });
+      setIsSubmitting(false);
       return;
     }
     
@@ -45,11 +47,10 @@ export default function StudentLoginPage() {
         title: "Invalid Email Format",
         description: "Please use your official student email. e.g., '24cs100@psgitech.ac.in'.",
       });
+      setIsSubmitting(false);
       return;
     }
 
-    setIsSubmitting(true);
-    
     try {
       localStorage.setItem("student_email", email);
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
@@ -68,8 +69,9 @@ export default function StudentLoginPage() {
         title: "Authentication Error",
         description: "Could not verify your email at this time. Please try again.",
       });
-      setIsSubmitting(false); // Only set to false on error, success will navigate away
+      setIsSubmitting(false);
     }
+    // No need to set isSubmitting to false on successful navigation.
   };
 
   return (
