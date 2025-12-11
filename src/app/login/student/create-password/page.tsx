@@ -99,8 +99,13 @@ function CreatePasswordPageContent() {
             if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
                 description = "Your password is too weak. Please choose a stronger one with at least 6 characters.";
             } else if (error.code === 'auth/email-already-in-use') {
-                description = "This email is already registered. Please go back and log in.";
+                toast({
+                    variant: "destructive",
+                    title: "Account Exists",
+                    description: "This email is already registered. Redirecting to login...",
+                });
                 router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
+                return;
             }
             toast({
                 variant: "destructive",
@@ -177,5 +182,3 @@ export default function StudentCreatePasswordPage() {
       </Suspense>
     );
 }
-
-    

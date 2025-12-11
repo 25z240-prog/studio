@@ -55,8 +55,13 @@ function EnterPasswordPageContent() {
             if (error.code === AuthErrorCodes.INVALID_PASSWORD || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                 description = "The password you entered is incorrect. Please try again.";
             } else if (error.code === 'auth/user-not-found') {
-                description = "This account does not exist. Please go back and create an account.";
+                toast({
+                    variant: "destructive",
+                    title: "Account Not Found",
+                    description: "This account does not exist. Redirecting to account creation...",
+                });
                 router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
+                return;
             } else if (error.code === 'auth/too-many-requests') {
                 description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
             }
@@ -126,5 +131,3 @@ export default function StudentEnterPasswordPage() {
       </Suspense>
     );
 }
-
-    
