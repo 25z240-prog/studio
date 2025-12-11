@@ -70,7 +70,10 @@ function VotePageContent() {
   }
   
   const renderCategory = (day: DayOfWeek, category: MenuCategory) => {
-    const items = groupedMenuItems[day]?.filter(item => item.category === category);
+    const items = groupedMenuItems[day]
+      ?.filter(item => item.category === category)
+      .sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
     if (!items || items.length === 0) {
       return <p className="text-muted-foreground text-center py-8">No items for {category} on {day}.</p>;
     }
