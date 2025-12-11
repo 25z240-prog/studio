@@ -56,13 +56,8 @@ function EnterPasswordContent() {
       router.push('/vote?role=student');
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
-      // Firebase's `auth/invalid-credential` is used for both "user not found" and "wrong password" on the client SDK
-      // Since this page is only for existing users, we can confidently assume it's a wrong password.
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         description = "The password you entered is incorrect. Please try again.";
-      } else if (error.code === 'auth/user-not-found') {
-        // This case is unlikely if the flow is correct, but we handle it.
-        description = "This email account does not exist. Please go back and create an account.";
       } else if (error.code === 'auth/too-many-requests') {
         description = "Access to this account has been temporarily disabled due to many failed login attempts.";
       }
@@ -82,8 +77,8 @@ function EnterPasswordContent() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Welcome Back!</CardTitle>
-          <CardDescription>Enter your password to log in to your account: {email}</CardDescription>
+          <CardTitle className="text-2xl font-headline">Enter Password</CardTitle>
+          <CardDescription>{email}</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-4">
