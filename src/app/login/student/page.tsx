@@ -118,7 +118,7 @@ export default function StudentLoginPage() {
             
             const userDocRef = doc(firestore, "users", user.uid);
             await setDoc(userDocRef, {
-                uid: user.uid,
+                id: user.uid,
                 email: user.email,
                 name: name,
                 hasPassword: true
