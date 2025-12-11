@@ -306,7 +306,7 @@ export default function StudentLoginPage() {
                 </div>
                 <DialogFooter>
                     <Button type="submit" className="w-full" disabled={isSubmitting}>
-                        {isSubmitting ? "Creating account..." : "Login"}
+                        {isSubmitting ? "Validating..." : "Login"}
                     </Button>
                 </DialogFooter>
             </form>
