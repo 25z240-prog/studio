@@ -1,5 +1,5 @@
 
-"use "use client";
+"use client";
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -20,7 +20,7 @@ import {
 import { ThumbsUp, Trash2, CheckCheck } from "lucide-react";
 import type { MenuItem } from "@/lib/types";
 import { useFirebase, useUser, errorEmitter, FirestorePermissionError } from "@/firebase";
-import { doc, runTransaction, getDoc, collection, query, where } from 'firebase/firestore';
+import { doc, runTransaction, getDoc } from 'firebase/firestore';
 import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
