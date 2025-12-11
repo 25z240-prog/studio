@@ -301,7 +301,7 @@ export default function StudentLoginPage() {
                         <Input
                             id="create-password-dialog"
                             type={showPassword ? "text" : "password"}
-                            placeholder="Enter password"
+                            placeholder="Enter or create password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
