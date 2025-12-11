@@ -55,11 +55,10 @@ function EnterPasswordContent() {
       router.push('/vote?role=student');
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
-      // Handle specific login-related errors
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         description = "The password you entered is incorrect. Please try again.";
       } else if (error.code === 'auth/user-not-found') {
-        description = "No account found with this email. Please go back and create an account first.";
+        description = "No account found with this email. Please go back and use a different email.";
       } else if (error.code === 'auth/too-many-requests') {
         description = "Access to this account has been temporarily disabled due to many failed login attempts.";
       }

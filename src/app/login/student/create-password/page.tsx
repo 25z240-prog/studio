@@ -134,7 +134,7 @@ function CreatePasswordContent() {
                     <Link href="/login/student">Back to email entry</Link>
                 </Button>
                 <Button className="w-40" type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Creating Account..." : "Create & Login"}
+                    {isSubmitting ? "Creating..." : "Create & Login"}
                 </Button>
             </div>
         </form>
