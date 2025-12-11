@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Shield } from "lucide-react";
+import { Shield } from "lucide-react";
 
 export default function LoginPage() {
   return (
@@ -18,16 +18,10 @@ export default function LoginPage() {
         </div>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Select Your Role</CardTitle>
+          <CardTitle className="text-2xl font-headline">Login</CardTitle>
           <CardDescription>Please choose your login type to continue.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <Link href="/login/student" passHref>
-            <Button variant="outline" className="w-full h-16 text-lg">
-              <User className="mr-3 h-6 w-6" />
-              Student Login
-            </Button>
-          </Link>
           <Link href="/login/management" passHref>
             <Button variant="outline" className="w-full h-16 text-lg">
               <Shield className="mr-3 h-6 w-6" />
@@ -46,5 +40,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    
