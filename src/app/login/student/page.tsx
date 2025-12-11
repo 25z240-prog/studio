@@ -70,13 +70,8 @@ export default function StudentLoginPage() {
         // User exists, go to enter password page
         router.push(`/login/student/enter-password?email=${encodeURIComponent(email)}`);
       } else {
-        // New user, show error as registration is disabled
-        toast({
-            variant: "destructive",
-            title: "User Not Found",
-            description: "An account with this email does not exist. Registration is currently disabled.",
-        });
-        setIsSubmitting(false);
+        // New user, go to create password page
+        router.push(`/login/student/create-password?email=${encodeURIComponent(email)}`);
       }
 
     } catch (error: any) {
