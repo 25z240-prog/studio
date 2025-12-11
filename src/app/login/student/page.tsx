@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { 
-  fetchSignInMethodsForEmail, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   updateProfile
@@ -87,65 +86,55 @@ export default function StudentLoginPage() {
     }
 
     try {
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      
-      if (signInMethods.length > 0) {
-        // User exists, sign them in
+      // First, try to sign in. This is the most common case.
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+      router.push('/vote?role=student');
+    } catch (error: any) {
+      // If sign-in fails, check the error code.
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+        // User does not exist, so create a new account.
         try {
-          await signInWithEmailAndPassword(auth, email, password);
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+
+          const name = email.split('@')[0].replace(/[0-9.]/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()).trim();
+          await updateProfile(user, { displayName: name });
+          
+          const userDocRef = doc(firestore, "users", user.uid);
+          await setDoc(userDocRef, {
+              id: user.uid,
+              email: user.email,
+              name: name,
+              hasPassword: true
+          });
+
           toast({
-              title: "Success!",
-              description: "You are now logged in.",
+              title: "Account Created!",
+              description: "Welcome! You are now logged in.",
           });
           router.push('/vote?role=student');
-        } catch (error: any) {
-           let description = "An unexpected error occurred. Please try again.";
-           if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-               description = "The password you entered is incorrect. Please try again.";
-           } else if (error.code === 'auth/too-many-requests') {
-               description = "Access to this account has been temporarily disabled due to many failed login attempts. Please try again later.";
-           }
-           toast({ variant: "destructive", title: "Login Failed", description });
+        } catch (registrationError: any) {
+          // Handle specific registration errors.
+          let description = "An unexpected error occurred during registration. Please try again.";
+          if (registrationError.code === 'auth/weak-password') {
+              description = "The password is too weak. Please use a stronger password.";
+          }
+          toast({ variant: "destructive", title: "Registration Failed", description });
         }
       } else {
-        // New user, create an account
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            const name = email.split('@')[0].replace(/[0-9.]/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()).trim();
-            await updateProfile(user, { displayName: name });
-            
-            const userDocRef = doc(firestore, "users", user.uid);
-            await setDoc(userDocRef, {
-                id: user.uid,
-                email: user.email,
-                name: name,
-                hasPassword: true
-            });
-
-            toast({
-                title: "Account Created!",
-                description: "You are now logged in.",
-            });
-            router.push('/vote?role=student');
-
-        } catch (error: any) {
-            let description = "An unexpected error occurred. Please try again.";
-            if (error.code === 'auth/weak-password') {
-                description = "The password is too weak. Please use a stronger password.";
-            } else if (error.code === 'auth/email-already-in-use') {
-                 description = "This email is already in use. Please go back and log in.";
-            }
-            toast({ variant: "destructive", title: "Registration Failed", description });
+        // Handle other sign-in errors (e.g., wrong password).
+        let description = "An unexpected error occurred. Please try again.";
+        if (error.code === 'auth/wrong-password') {
+            description = "The password you entered is incorrect. Please try again.";
+        } else if (error.code === 'auth/too-many-requests') {
+            description = "Access to this account has been temporarily disabled due to many failed login attempts.";
         }
+        toast({ variant: "destructive", title: "Login Failed", description });
       }
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: error.message || "An unexpected error occurred while checking your email. Please try again.",
-      });
     } finally {
         setIsSubmitting(false);
     }
@@ -162,7 +151,7 @@ export default function StudentLoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-headline">Student Login</CardTitle>
-          <CardDescription>Enter your PSG iTech email and password to continue. If you're new, an account will be created for you.</CardDescription>
+          <CardDescription>Enter your PSG iTech email and password. An account will be created if you're new.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-4">
@@ -205,3 +194,5 @@ export default function StudentLoginPage() {
     </div>
   );
 }
+
+    
