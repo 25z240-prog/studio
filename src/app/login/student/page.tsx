@@ -271,7 +271,7 @@ export default function StudentLoginPage() {
             <DialogHeader>
               <DialogTitle className="font-headline text-2xl">Enter password</DialogTitle>
               <DialogDescription>
-                Enter a password for <span className="font-medium text-foreground">{email}</span> to create your account.
+                Enter a password for <span className="font-medium text-foreground">{email}</span>.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateAccountSubmit}>
