@@ -72,18 +72,24 @@ function VotePageContent() {
   const renderCategory = (day: DayOfWeek, category: MenuCategory) => {
     const filteredItems = groupedMenuItems[day]
       ?.filter(item => item.category === category);
-
-    const items = role === 'management' 
+  
+    const items = role === 'management'
       ? filteredItems?.sort((a, b) => (b.votes || 0) - (a.votes || 0))
       : filteredItems;
-
+  
     if (!items || items.length === 0) {
       return <p className="text-muted-foreground text-center py-8">No items for {category} on {day}.</p>;
     }
+  
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {items.map(item => (
-          <MenuItemCard key={item.id} item={item} role={role as 'student' | 'management'} />
+        {items.map((item, index) => (
+          <MenuItemCard 
+            key={item.id} 
+            item={item} 
+            role={role as 'student' | 'management'} 
+            rank={role === 'management' ? index + 1 : undefined}
+          />
         ))}
       </div>
     );

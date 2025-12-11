@@ -27,9 +27,10 @@ import { useToast } from "@/hooks/use-toast";
 interface MenuItemCardProps {
   item: MenuItem;
   role: 'student' | 'management';
+  rank?: number;
 }
 
-export function MenuItemCard({ item, role }: MenuItemCardProps) {
+export function MenuItemCard({ item, role, rank }: MenuItemCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
@@ -132,6 +133,13 @@ export function MenuItemCard({ item, role }: MenuItemCardProps) {
   
   const currentVotes = item.votes || 0;
 
+  const getRankColor = (rank: number) => {
+    if (rank === 1) return 'bg-yellow-500/80 text-yellow-950 border-yellow-600/50'; // Gold
+    if (rank === 2) return 'bg-slate-400/80 text-slate-950 border-slate-500/50'; // Silver
+    if (rank === 3) return 'bg-orange-400/80 text-orange-950 border-orange-500/50'; // Bronze
+    return 'bg-secondary/80 text-secondary-foreground border-border';
+  };
+
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
       <CardHeader className="p-0 relative">
@@ -143,6 +151,13 @@ export function MenuItemCard({ item, role }: MenuItemCardProps) {
           height={400}
           className="aspect-video w-full object-cover"
         />
+         {role === 'management' && rank && (
+          <Badge
+            className={`absolute top-2 left-2 text-base font-bold backdrop-blur-sm ${getRankColor(rank)}`}
+          >
+            #{rank}
+          </Badge>
+        )}
       </CardHeader>
       <CardContent className="flex-1 p-4">
         <CardTitle className="text-lg font-headline mb-2">{item.title}</CardTitle>
