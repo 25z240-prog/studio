@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, AuthErrorCodes, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { Eye, EyeOff } from "lucide-react";
 
 function CreatePasswordPageContent() {
@@ -57,35 +57,20 @@ function CreatePasswordPageContent() {
         setIsSubmitting(true);
 
         try {
-            // Check if user document already exists
-            const userQuery = await getDoc(doc(firestore, "users_by_email", email));
-            if (userQuery.exists()) {
-                // User document exists, likely created by auth but maybe without hasPassword flag
-                const existingUser = await signInWithEmailAndPassword(auth, email, password);
-                const userDocRef = doc(firestore, "users", existingUser.user.uid);
-                await setDoc(userDocRef, { hasPassword: true }, { merge: true });
-            } else {
-                // New user
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
-                const name = email.split('@')[0].replace(/[0-9]/g, '').replace(/\./g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
-                await updateProfile(user, { displayName: name });
-                
-                const userDocRef = doc(firestore, "users", user.uid);
-                await setDoc(userDocRef, {
-                    uid: user.uid,
-                    email: user.email,
-                    name: name,
-                    role: 'student',
-                    hasPassword: true
-                });
-                
-                // Also create a lookup document for email-based checks
-                const emailDocRef = doc(firestore, "users_by_email", email);
-                await setDoc(emailDocRef, { uid: user.uid });
-            }
-
+            const name = email.split('@')[0].replace(/[0-9]/g, '').replace(/\./g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+            await updateProfile(user, { displayName: name });
+            
+            const userDocRef = doc(firestore, "users", user.uid);
+            await setDoc(userDocRef, {
+                uid: user.uid,
+                email: user.email,
+                name: name,
+                role: 'student',
+                hasPassword: true
+            });
 
             toast({
                 title: "Account Ready!",
@@ -96,23 +81,11 @@ function CreatePasswordPageContent() {
         } catch (error: any) {
             let description = "An unexpected error occurred. Please try again.";
             if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
-                // This can happen in a race condition. Try to sign them in and set the flag.
-                try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    router.push('/vote?role=student');
-                } catch (signInError) {
-                     toast({
-                        variant: "destructive",
-                        title: "Login Failed",
-                        description: "This email is already registered. Please go back and log in.",
-                    });
-                }
+                description = "This email is already registered. Please go back and log in.";
             } else if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
                 description = "The password is too weak. Please use a stronger password.";
-                 toast({ variant: "destructive", title: "Registration Failed", description });
-            } else {
-                 toast({ variant: "destructive", title: "Registration Failed", description: error.message });
             }
+            toast({ variant: "destructive", title: "Registration Failed", description });
         } finally {
             setIsSubmitting(false);
         }
