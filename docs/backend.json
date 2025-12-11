@@ -83,6 +83,10 @@
             "non-veg"
           ],
           "description": "Dietary information (e.g., veg, non-veg)."
+        },
+        "votes": {
+          "type": "number",
+          "description": "The number of votes the menu item has received."
         }
       },
       "required": [
@@ -91,7 +95,33 @@
         "day",
         "imageUrl",
         "imageHint",
-        "dietaryInfo"
+        "dietaryInfo",
+        "votes"
+      ]
+    },
+    "UserVote": {
+      "title": "User Vote",
+      "type": "object",
+      "description": "Tracks a single vote from a user for a menu item to prevent duplicate voting.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who voted."
+        },
+        "menuItemId": {
+          "type": "string",
+          "description": "The ID of the menu item that was voted for."
+        },
+        "votedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the vote was cast."
+        }
+      },
+      "required": [
+        "userId",
+        "menuItemId",
+        "votedAt"
       ]
     }
   },
@@ -134,8 +164,24 @@
             }
           ]
         }
+      },
+      {
+        "path": "/userVotes/{voteId}",
+        "definition": {
+          "entityName": "UserVote",
+          "schema": {
+            "$ref": "#/backend/entities/UserVote"
+          },
+          "description": "Tracks individual user votes to prevent duplicates. The document ID is a composite of userId and menuItemId.",
+          "params": [
+            {
+              "name": "voteId",
+              "description": "Composite key: `${userId}_${menuItemId}`"
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support a hostel menu voting application. It includes a 'users' collection to store user profiles and a 'menuItems' collection to store the menu items available for voting. This structure allows for easy querying of menu items and separates user data from application data, which simplifies security rules and data management."
+    "reasoning": "The Firestore structure is designed to support a hostel menu voting application. It includes a 'users' collection for profiles, a 'menuItems' collection for votable items, and a 'userVotes' collection to enforce the one-vote-per-user-per-item rule. This structure separates user data, application data, and voting records for clear management and security."
   }
 }

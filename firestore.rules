@@ -28,7 +28,21 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create: if isManagement();
       allow delete: if isManagement();
-      allow update: if isManagement();
+      // Students can update the 'votes' field, but only by incrementing it.
+      // Management can update any field.
+      allow update: if (isManagement() || 
+        (isStudent() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']) 
+                     && request.resource.data.votes == resource.data.votes + 1));
+    }
+    
+    match /userVotes/{voteId} {
+        allow read: if isSignedIn();
+        // A user can only create a vote document if the document ID matches their own user ID
+        // and the vote is for themself.
+        allow create: if isStudent() && isOwner(request.resource.data.userId) 
+                                     && voteId == request.resource.data.userId + '_' + request.resource.data.menuItemId;
+        allow delete: if false;
+        allow update: if false;
     }
   }
 }

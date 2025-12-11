@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ThumbsUp, Trash2 } from "lucide-react";
 import type { MenuItem } from "@/lib/types";
-import { useFirestore } from "@/firebase";
-import { doc } from 'firebase/firestore';
+import { useFirebase, useUser } from "@/firebase";
+import { doc, runTransaction, getDoc, collection, query, where } from 'firebase/firestore';
 import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,12 +31,70 @@ interface MenuItemCardProps {
 
 export function MenuItemCard({ item, role }: MenuItemCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const firestore = useFirestore();
+  const [isVoting, setIsVoting] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
+  const { firestore } = useFirebase();
+  const { user } = useUser();
   const { toast } = useToast();
 
-  const handleVote = () => {
-    // TODO: Implement voting logic
-    console.log("Voting for", item.title);
+  useEffect(() => {
+    if (role === 'student' && user && firestore && item.id) {
+      const voteRef = doc(firestore, 'userVotes', `${user.uid}_${item.id}`);
+      getDoc(voteRef).then(docSnap => {
+        if (docSnap.exists()) {
+          setHasVoted(true);
+        }
+      });
+    }
+  }, [user, firestore, item.id, role]);
+
+  const handleVote = async () => {
+    if (!firestore || !user || !item.id) return;
+    setIsVoting(true);
+
+    const itemRef = doc(firestore, 'menuItems', item.id);
+    const voteRef = doc(firestore, 'userVotes', `${user.uid}_${item.id}`);
+
+    try {
+      await runTransaction(firestore, async (transaction) => {
+        const voteDoc = await transaction.get(voteRef);
+        if (voteDoc.exists()) {
+          // Already voted, do nothing in the transaction.
+          // The UI is already updated via `hasVoted` state.
+          toast({
+            variant: "destructive",
+            title: "Already Voted",
+            description: "You have already voted for this item.",
+          });
+          return;
+        }
+
+        const itemDoc = await transaction.get(itemRef);
+        if (!itemDoc.exists()) {
+          throw new Error("Menu item does not exist!");
+        }
+
+        const newVoteCount = (itemDoc.data().votes || 0) + 1;
+        transaction.update(itemRef, { votes: newVoteCount });
+        transaction.set(voteRef, { userId: user.uid, menuItemId: item.id, votedAt: new Date() });
+      });
+
+      setHasVoted(true); // Update UI to reflect the vote
+      toast({
+        title: "Vote Cast!",
+        description: `Your vote for "${item.title}" has been recorded.`,
+      });
+
+    } catch (error: any) {
+      console.error("Voting failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Vote Failed",
+        description: error.message || "Could not record your vote. Please try again.",
+      });
+    } finally {
+      setIsVoting(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -60,6 +118,8 @@ export function MenuItemCard({ item, role }: MenuItemCardProps) {
     }
     // No need to set isDeleting to false here, as the component will unmount on success.
   };
+  
+  const currentVotes = item.votes || 0;
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
@@ -84,15 +144,24 @@ export function MenuItemCard({ item, role }: MenuItemCardProps) {
           {item.dietaryInfo.toUpperCase()}
         </Badge>
       </CardContent>
-      <CardFooter className="p-4 pt-0 flex gap-2">
+      <CardFooter className="p-4 pt-0 flex gap-2 items-center">
         {role === 'student' && (
-          <Button onClick={handleVote} className="w-full">
-            <ThumbsUp className="mr-2 h-4 w-4" /> Vote
+          <Button onClick={handleVote} className="w-full" disabled={isVoting || hasVoted}>
+            <ThumbsUp className="mr-2 h-4 w-4" />
+            <span className="flex-1">{hasVoted ? 'Voted' : 'Vote'}</span>
+             {currentVotes > 0 && (
+                <Badge variant="outline" className="ml-2 bg-background/50 backdrop-blur-sm">
+                  {currentVotes}
+                </Badge>
+              )}
           </Button>
         )}
         {role === 'management' && (
           <>
-            <p className="text-sm text-muted-foreground w-full text-center flex-1">Votes will appear here</p>
+             <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground gap-2">
+                <ThumbsUp className="h-4 w-4" />
+                <span>{currentVotes} {currentVotes === 1 ? 'Vote' : 'Votes'}</span>
+            </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" size="icon" disabled={isDeleting}>
